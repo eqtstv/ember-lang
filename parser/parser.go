@@ -54,7 +54,7 @@ type (
 )
 
 type Parser struct {
-	l      *lexer.Lexer
+	lexer  *lexer.Lexer
 	errors []string
 
 	curToken  token.Token
@@ -64,45 +64,45 @@ type Parser struct {
 	infixParseFns  map[token.TokenType]InfixParseFn
 }
 
-func New(l *lexer.Lexer) *Parser {
-	p := &Parser{l: l, errors: []string{}}
+func New(lexer *lexer.Lexer) *Parser {
+	parser := &Parser{lexer: lexer, errors: []string{}}
 
 	// Prefix parse functions
-	p.prefixParseFns = make(map[token.TokenType]PrefixParseFn)
-	p.registerPrefix(token.IDENT, p.parseIdentifier)
-	p.registerPrefix(token.INT, p.parseIntegerLiteral)
-	p.registerPrefix(token.BANG, p.parsePrefixExpression)
-	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
+	parser.prefixParseFns = make(map[token.TokenType]PrefixParseFn)
+	parser.registerPrefix(token.IDENT, parser.parseIdentifier)
+	parser.registerPrefix(token.INT, parser.parseIntegerLiteral)
+	parser.registerPrefix(token.BANG, parser.parsePrefixExpression)
+	parser.registerPrefix(token.MINUS, parser.parsePrefixExpression)
 
 	// Infix parse functions
-	p.infixParseFns = make(map[token.TokenType]InfixParseFn)
-	p.registerInfix(token.PLUS, p.parseInfixExpression)
-	p.registerInfix(token.MINUS, p.parseInfixExpression)
-	p.registerInfix(token.SLASH, p.parseInfixExpression)
-	p.registerInfix(token.ASTERISK, p.parseInfixExpression)
-	p.registerInfix(token.EQ, p.parseInfixExpression)
-	p.registerInfix(token.NEQ, p.parseInfixExpression)
-	p.registerInfix(token.LT, p.parseInfixExpression)
-	p.registerInfix(token.GT, p.parseInfixExpression)
+	parser.infixParseFns = make(map[token.TokenType]InfixParseFn)
+	parser.registerInfix(token.PLUS, parser.parseInfixExpression)
+	parser.registerInfix(token.MINUS, parser.parseInfixExpression)
+	parser.registerInfix(token.SLASH, parser.parseInfixExpression)
+	parser.registerInfix(token.ASTERISK, parser.parseInfixExpression)
+	parser.registerInfix(token.EQ, parser.parseInfixExpression)
+	parser.registerInfix(token.NEQ, parser.parseInfixExpression)
+	parser.registerInfix(token.LT, parser.parseInfixExpression)
+	parser.registerInfix(token.GT, parser.parseInfixExpression)
 
 	// Read two tokens, so curToken and peekToken are both set
-	p.nextToken()
-	p.nextToken()
+	parser.nextToken()
+	parser.nextToken()
 
-	return p
+	return parser
 }
 
-func (p *Parser) parseIdentifier() ast.Expression {
-	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+func (parser *Parser) parseIdentifier() ast.Expression {
+	return &ast.Identifier{Token: parser.curToken, Value: parser.curToken.Literal}
 }
 
-func (p *Parser) parseIntegerLiteral() ast.Expression {
-	literal := &ast.IntegerLiteral{Token: p.curToken}
+func (parser *Parser) parseIntegerLiteral() ast.Expression {
+	literal := &ast.IntegerLiteral{Token: parser.curToken}
 
-	value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
+	value, err := strconv.ParseInt(parser.curToken.Literal, 0, 64)
 	if err != nil {
-		message := fmt.Sprintf("could not parse %q as integer", p.curToken.Literal)
-		p.errors = append(p.errors, message)
+		message := fmt.Sprintf("could not parse %q as integer", parser.curToken.Literal)
+		parser.errors = append(parser.errors, message)
 		return nil
 	}
 
@@ -165,65 +165,65 @@ func (p *Parser) expectPeek(t token.TokenType) bool {
 
 }
 
-func (p *Parser) nextToken() {
-	p.curToken = p.peekToken
-	p.peekToken = p.l.NextToken()
+func (parser *Parser) nextToken() {
+	parser.curToken = parser.peekToken
+	parser.peekToken = parser.lexer.NextToken()
 }
 
-func (p *Parser) registerPrefix(tokenType token.TokenType, fn PrefixParseFn) {
-	p.prefixParseFns[tokenType] = fn
+func (parser *Parser) registerPrefix(tokenType token.TokenType, fn PrefixParseFn) {
+	parser.prefixParseFns[tokenType] = fn
 }
 
-func (p *Parser) registerInfix(tokenType token.TokenType, fn InfixParseFn) {
-	p.infixParseFns[tokenType] = fn
+func (parser *Parser) registerInfix(tokenType token.TokenType, fn InfixParseFn) {
+	parser.infixParseFns[tokenType] = fn
 }
 
-func (p *Parser) ParseProgram() *ast.Program {
+func (parser *Parser) ParseProgram() *ast.Program {
 	program := &ast.Program{}
 	program.Statements = []ast.Statement{}
 
-	for p.curToken.Type != token.EOF {
-		statement := p.parseStatement()
+	for parser.curToken.Type != token.EOF {
+		statement := parser.parseStatement()
 
 		program.Statements = append(program.Statements, statement)
 
-		p.nextToken()
+		parser.nextToken()
 	}
 
 	return program
 }
 
-func (p *Parser) parseStatement() ast.Statement {
-	switch p.curToken.Type {
+func (parser *Parser) parseStatement() ast.Statement {
+	switch parser.curToken.Type {
 	case token.LET:
-		return p.parseLetStatement()
+		return parser.parseLetStatement()
 	case token.RETURN:
-		return p.parseReturnStatement()
+		return parser.parseReturnStatement()
 	default:
-		return p.parseExpressionStatement()
+		return parser.parseExpressionStatement()
 	}
 
 }
 
-func (p *Parser) parseLetStatement() *ast.LetStatement {
-	stmt := &ast.LetStatement{Token: p.curToken}
+func (parser *Parser) parseLetStatement() *ast.LetStatement {
+	stmt := &ast.LetStatement{Token: parser.curToken}
 
-	if !p.expectPeek(token.IDENT) {
+	if !parser.expectPeek(token.IDENT) {
 		return nil
 	}
 
 	stmt.Name = &ast.Identifier{
-		Token: p.curToken,
-		Value: p.curToken.Literal,
+		Token: parser.curToken,
+		Value: parser.curToken.Literal,
 	}
 
-	if !p.expectPeek(token.ASSIGN) {
+	if !parser.expectPeek(token.ASSIGN) {
 		return nil
 	}
 
 	// TODO: We are skipping the expressions until we encounter a semicolon
-	for !p.curTokenIs(token.SEMICOLON) {
-		p.nextToken()
+	for !parser.curTokenIs(token.SEMICOLON) {
+		parser.nextToken()
 	}
 
 	return stmt
