@@ -122,8 +122,8 @@ func (rs *ReturnStatement) String() string {
 // ------------------------------------- ExpressionStatement -------------------------------------
 
 type ExpressionStatement struct {
-	Token token.Token // token.IDENT token
-	Value Expression
+	Token      token.Token // token.IDENT token
+	Expression Expression
 }
 
 func (es *ExpressionStatement) statementNode() {}
@@ -133,8 +133,25 @@ func (es *ExpressionStatement) TokenLiteral() string {
 }
 
 func (es *ExpressionStatement) String() string {
-	if es.Value != nil {
-		return es.Value.String()
+	if es.Expression != nil {
+		return es.Expression.String()
 	}
 	return ""
+}
+
+// ------------------------------------- IntegerLiteral -------------------------------------
+
+type IntegerLiteral struct {
+	Token token.Token // token.INT token
+	Value int64
+}
+
+func (il *IntegerLiteral) expressionNode() {}
+
+func (il *IntegerLiteral) TokenLiteral() string {
+	return il.Token.Literal
+}
+
+func (il *IntegerLiteral) String() string {
+	return il.Token.Literal
 }
