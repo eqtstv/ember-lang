@@ -99,5 +99,5 @@ func (e *Error) Type() ObjectType {
 }
 
 func (e *Error) Inspect() string {
-	return "ERROR: " + e.Message
+	return "\033[31mERROR: " + e.Message + "\033[0m"
 }

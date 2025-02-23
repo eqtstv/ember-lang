@@ -47,8 +47,8 @@ func Start(in io.Reader, out io.Writer) {
 }
 
 func printParserErrors(out io.Writer, errors []string) {
-	_, _ = io.WriteString(out, "\x1b[31mFailed to parse program!\x1b[0m\n\n")
-	_, _ = io.WriteString(out, "\x1b[31mParser errors:\x1b[0m\n")
+	_, _ = io.WriteString(out, "\033[31mFailed to parse program!\033[0m\n\n")
+	_, _ = io.WriteString(out, "\033[31mPARSER ERRORS:\033[0m\n")
 
 	for _, msg := range errors {
 		_, _ = io.WriteString(out, "\t"+msg+"\n")
