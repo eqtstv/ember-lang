@@ -50,9 +50,18 @@ func init() {
 					return newError("Invalid argument to map. Got: %s, Expected: ARRAY", args[0].Type())
 				}
 
-				function, ok := args[1].(*object.Function)
-				if !ok {
-					return newError("Invalid argument to map. Got: %s, Expected: FUNCTION", args[1].Type())
+				var function object.Object
+
+				if args[1].Type() == object.BUILTIN_OBJ {
+					function, ok = args[1].(*object.Builtin)
+					if !ok {
+						return newError("Invalid argument to map. Got: %s, Expected: FUNCTION", args[1].Type())
+					}
+				} else {
+					function, ok = args[1].(*object.Function)
+					if !ok {
+						return newError("Invalid argument to map. Got: %s, Expected: FUNCTION", args[1].Type())
+					}
 				}
 
 				newArray := &object.Array{Elements: make([]object.Object, 0, len(array.Elements))}
@@ -79,9 +88,18 @@ func init() {
 					return newError("Invalid argument to reduce. Got: %s, Expected: ARRAY", args[0].Type())
 				}
 
-				function, ok := args[1].(*object.Function)
-				if !ok {
-					return newError("Invalid argument to reduce. Got: %s, Expected: FUNCTION", args[1].Type())
+				var function object.Object
+
+				if args[1].Type() == object.BUILTIN_OBJ {
+					function, ok = args[1].(*object.Builtin)
+					if !ok {
+						return newError("Invalid argument to reduce. Got: %s, Expected: FUNCTION", args[1].Type())
+					}
+				} else {
+					function, ok = args[1].(*object.Function)
+					if !ok {
+						return newError("Invalid argument to reduce. Got: %s, Expected: FUNCTION", args[1].Type())
+					}
 				}
 
 				initialValue, ok := args[2].(*object.Integer)
@@ -107,6 +125,82 @@ func init() {
 				}
 
 				return initialValue
+			},
+		},
+		"add": {
+			Fn: func(args ...object.Object) object.Object {
+				if len(args) != 2 {
+					return newError("Invalid number of arguments. Got: %d, Expected: 2", len(args))
+				}
+
+				left, ok := args[0].(*object.Integer)
+				if !ok {
+					return newError("Invalid argument to add. Got: %s, Expected: INTEGER", args[0].Type())
+				}
+
+				right, ok := args[1].(*object.Integer)
+				if !ok {
+					return newError("Invalid argument to add. Got: %s, Expected: INTEGER", args[1].Type())
+				}
+
+				return &object.Integer{Value: left.Value + right.Value}
+			},
+		},
+		"sub": {
+			Fn: func(args ...object.Object) object.Object {
+				if len(args) != 2 {
+					return newError("Invalid number of arguments. Got: %d, Expected: 2", len(args))
+				}
+
+				left, ok := args[0].(*object.Integer)
+				if !ok {
+					return newError("Invalid argument to sub. Got: %s, Expected: INTEGER", args[0].Type())
+				}
+
+				right, ok := args[1].(*object.Integer)
+				if !ok {
+					return newError("Invalid argument to sub. Got: %s, Expected: INTEGER", args[1].Type())
+				}
+
+				return &object.Integer{Value: left.Value - right.Value}
+			},
+		},
+		"mul": {
+			Fn: func(args ...object.Object) object.Object {
+				if len(args) != 2 {
+					return newError("Invalid number of arguments. Got: %d, Expected: 2", len(args))
+				}
+
+				left, ok := args[0].(*object.Integer)
+				if !ok {
+					return newError("Invalid argument to mul. Got: %s, Expected: INTEGER", args[0].Type())
+				}
+
+				right, ok := args[1].(*object.Integer)
+				if !ok {
+					return newError("Invalid argument to mul. Got: %s, Expected: INTEGER", args[1].Type())
+				}
+
+				return &object.Integer{Value: left.Value * right.Value}
+			},
+		},
+		"div": {
+			Fn: func(args ...object.Object) object.Object {
+				if len(args) != 2 {
+					return newError("Invalid number of arguments. Got: %d, Expected: 2", len(args))
+				}
+
+				left, ok := args[0].(*object.Integer)
+				if !ok {
+					return newError("Invalid argument to div. Got: %s, Expected: INTEGER", args[0].Type())
+				}
+
+				right, ok := args[1].(*object.Integer)
+				if !ok {
+					return newError("Invalid argument to div. Got: %s, Expected: INTEGER", args[1].Type())
+				}
+
+				return &object.Integer{Value: left.Value / right.Value}
 			},
 		},
 	}

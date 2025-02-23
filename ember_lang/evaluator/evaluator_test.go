@@ -416,13 +416,25 @@ func TestArrayIndexExpressions(t *testing.T) {
 			"[1, 2, 3][-8]",
 			nil,
 		},
+		{
+			`["one", "two", "three"][1]`,
+			"two",
+		},
 	}
 	for _, tt := range tests {
 		evaluated := testEval(tt.input)
-		integer, ok := tt.expected.(int)
-		if ok {
-			testIntegerObject(t, evaluated, int64(integer))
-		} else {
+		switch expected := tt.expected.(type) {
+		case int:
+			testIntegerObject(t, evaluated, int64(expected))
+		case string:
+			str, ok := evaluated.(*object.String)
+			if !ok {
+				t.Fatalf("object is not String. got=%T (%+v)", evaluated, evaluated)
+			}
+			if str.Value != expected {
+				t.Errorf("String has wrong value. got=%q", str.Value)
+			}
+		case nil:
 			testNullObject(t, evaluated)
 		}
 	}
@@ -431,10 +443,11 @@ func TestArrayIndexExpressions(t *testing.T) {
 func TestMapFunction(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected []int64
+		expected []interface{}
 	}{
-		{`map([1, 2, 3], fn(x) { x * 2; })`, []int64{2, 4, 6}},
-		{`map([1, 2, 3, 4, 5], fn(x) { x * x; })`, []int64{1, 4, 9, 16, 25}},
+		{`map([1, 2, 3], fn(x) { x * 2; })`, []interface{}{2, 4, 6}},
+		{`map([1, 2, 3, 4, 5], fn(x) { x * x; })`, []interface{}{1, 4, 9, 16, 25}},
+		{`map(["one", "two", "three", "four", "five"], len)`, []interface{}{3, 3, 5, 4, 4}},
 	}
 	for _, tt := range tests {
 		evaluated := testEval(tt.input)
@@ -448,7 +461,18 @@ func TestMapFunction(t *testing.T) {
 		}
 
 		for i, expected := range tt.expected {
-			testIntegerObject(t, result.Elements[i], expected)
+			switch expected := expected.(type) {
+			case int:
+				testIntegerObject(t, result.Elements[i], int64(expected))
+			case string:
+				str, ok := result.Elements[i].(*object.String)
+				if !ok {
+					t.Fatalf("object is not String. got=%T (%+v)", result.Elements[i], result.Elements[i])
+				}
+				if str.Value != expected {
+					t.Errorf("String has wrong value. got=%q", str.Value)
+				}
+			}
 		}
 	}
 }
@@ -463,10 +487,28 @@ func TestReduceFunction(t *testing.T) {
 		{`reduce([1, 2, 3], fn(acc, x) { acc * x; }, 1)`, 6},
 		{`reduce([1, 2, 3], fn(acc, x) { acc * x; }, 0)`, 0},
 		{`reduce([1, 2, 3], fn(acc, x) { acc * x; }, 1)`, 6},
+		{`reduce([1, 2, 3], add, 0)`, 6},
+		{`reduce([1, 2, 3], sub, 0)`, -6},
+		{`reduce([1, 2, 3], mul, 1)`, 6},
+		{`reduce([1, 2, 3], div, 1)`, 0},
 	}
 	for _, tt := range tests {
 		evaluated := testEval(tt.input)
 
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
+func TestBuiltinStackingFunctions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{`reduce(map(["one", "two", "three"], len), add, 0)`, 11},
+		{`reduce(map([1, 2, 3], fn(x) { x * x; }), add, 0)`, 14},
+	}
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
 		testIntegerObject(t, evaluated, tt.expected)
 	}
 }
