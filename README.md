@@ -6,9 +6,11 @@ Ember is an interpreted programming language implemented in Go, designed to be s
 
 - C-like syntax with modern conveniences
 - First-class functions and closures
-- Dynamic typing with integers, booleans, and functions
+- Dynamic typing with integers, booleans, arrays, hashes, and functions
 - Lexical scoping and proper closures
 - Built-in integer arithmetic and boolean operations
+- Array operations (map, reduce, push)
+- Built-in functions for common operations
 - Variables with `let` keyword
 - Control flow (`if`/`else`)
 - Return statements
