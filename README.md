@@ -15,6 +15,55 @@ Ember is an interpreted programming language implemented in Go, designed to be s
 - Operator precedence parsing
 - REPL with error reporting
 
+## Language Syntax
+
+Basic examples:
+
+```ember
+// Variables and arithmetic
+let age = 25;
+let temperature = 18 + 5;
+let isHot = temperature > 20;
+
+// Functions
+let greet = fn(name) {
+    return "Hello, " + name + "!";
+};
+greet("John");  // Returns "Hello, John!"
+
+// Conditionals
+let max = fn(a, b) {
+    if (a > b) {
+        return a;
+    } else {
+        return b;
+    }
+};
+
+// Functions and closures
+let makeCounter = fn() {
+    let count = 0;
+    return fn() {
+        count = count + 1;
+        return count;
+    };
+};
+
+let counter = makeCounter();
+counter();  // Returns 1
+counter();  // Returns 2
+
+// Recursive functions
+let fib = fn(n) {
+    if (n <= 1) {
+        return n;
+    }
+    return fib(n - 1) + fib(n - 2);
+};
+
+let result = fib(10);  // Calculate 10th Fibonacci number
+```
+
 ## Quick Start
 
 1. Clone the repository and navigate to the project directory:
@@ -78,33 +127,4 @@ make build    # Build the ember binary
 make test     # Run tests
 make lint     # Run linter
 make run      # Run the REPL
-```
-
-## Language Syntax
-
-Basic examples:
-
-```ember
-// Functions and closures
-let makeCounter = fn() {
-    let count = 0;
-    return fn() {
-        count = count + 1;
-        return count;
-    };
-};
-
-let counter = makeCounter();
-counter();  // Returns 1
-counter();  // Returns 2
-
-// Recursive functions
-let fib = fn(n) {
-    if (n <= 1) {
-        return n;
-    }
-    return fib(n - 1) + fib(n - 2);
-};
-
-let result = fib(10);  // Calculate 10th Fibonacci number
 ```
