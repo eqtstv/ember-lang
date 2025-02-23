@@ -64,6 +64,17 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return right
 		}
 		return evalInfixExpression(node.Operator, left, right)
+	case *ast.IndexExpression:
+		left := Eval(node.Left, env)
+		if isError(left) {
+			return left
+		}
+		index := Eval(node.Index, env)
+		if isError(index) {
+			return index
+		}
+		return evalIndexExpression(left, index)
+
 	case *ast.IfExpression:
 		return evalIfExpression(node, env)
 	case *ast.Identifier:
@@ -268,6 +279,26 @@ func evalIntegerInfixExpression(operator string, left object.Object, right objec
 	default:
 		return newError("Unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
+}
+
+func evalIndexExpression(left object.Object, index object.Object) object.Object {
+	switch {
+	case left.Type() == object.ARRAY_OBJ && index.Type() == object.INTEGER_OBJ:
+		return evalArrayIndexExpression(left, index)
+	default:
+		return newError("Index operator not supported: %s %s", left.Type(), index.Type())
+	}
+}
+
+func evalArrayIndexExpression(array object.Object, index object.Object) object.Object {
+	arrayObject := array.(*object.Array)
+	indexObject := index.(*object.Integer)
+
+	if indexObject.Value < 0 || indexObject.Value >= int64(len(arrayObject.Elements)) {
+		return NULL
+	}
+
+	return arrayObject.Elements[indexObject.Value]
 }
 
 func evalStringInfixExpression(operator string, left object.Object, right object.Object) object.Object {
