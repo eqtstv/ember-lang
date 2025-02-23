@@ -20,6 +20,7 @@ const (
 	ERROR_OBJ        ObjectType = "ERROR"
 	FUNCTION_OBJ     ObjectType = "FUNCTION"
 	STRING_OBJ       ObjectType = "STRING"
+	BUILTIN_OBJ      ObjectType = "BUILTIN"
 )
 
 // ----------------------------------------------------------------------------
@@ -155,4 +156,22 @@ func (s *String) Type() ObjectType {
 
 func (s *String) Inspect() string {
 	return s.Value
+}
+
+// ----------------------------------------------------------------------------
+// Builtin Object
+// ----------------------------------------------------------------------------
+
+type Builtin struct {
+	Fn BuiltinFunction
+}
+
+type BuiltinFunction func(args ...Object) Object
+
+func (b *Builtin) Type() ObjectType {
+	return BUILTIN_OBJ
+}
+
+func (b *Builtin) Inspect() string {
+	return "builtin function"
 }
