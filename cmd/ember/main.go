@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 )
 
+var debug = os.Getenv("DEBUG") == "1"
+
 func main() {
 	if len(os.Args) > 1 {
 		// Execute file mode
@@ -37,7 +39,21 @@ func executeFile(path string) {
 		os.Exit(1)
 	}
 
+	if debug {
+		fmt.Printf("\n=== Source Code ===\n%s\n", string(code))
+	}
+
+	// Lexical analysis
 	l := lexer.New(string(code))
+	if debug {
+		fmt.Println("\n=========================== Tokens ===========================")
+		for tok := l.NextToken(); tok.Type != "EOF"; tok = l.NextToken() {
+			fmt.Printf("%+v\n", tok)
+		}
+		l = lexer.New(string(code)) // Reset lexer for parsing
+	}
+
+	// Parsing
 	p := parser.New(l)
 	program := p.ParseProgram()
 
@@ -46,8 +62,17 @@ func executeFile(path string) {
 		os.Exit(1)
 	}
 
+	if debug {
+		fmt.Printf("\n=========================== AST ===========================\n%s\n", program.String())
+	}
+
+	// Evaluation
 	env := object.NewEnvironment()
 	result := evaluator.Eval(program, env)
+
+	if debug {
+		fmt.Printf("\n=========================== Result ===========================\n")
+	}
 
 	if result != nil {
 		fmt.Println(result.Inspect())
