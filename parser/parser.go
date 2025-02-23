@@ -276,7 +276,7 @@ func (p *Parser) Errors() []string {
 }
 
 func (p *Parser) peekError(t token.TokenType) {
-	message := fmt.Sprintf("\x1b[31mError: Expected next token to be: %s, got: %s (%s) instead\x1b[0m",
+	message := fmt.Sprintf("\x1b[31mExpected next token to be: %s, got: %s (%s) instead.\x1b[0m",
 		t, p.peekToken.Type, p.peekToken.Literal)
 	p.errors = append(p.errors, message)
 }
