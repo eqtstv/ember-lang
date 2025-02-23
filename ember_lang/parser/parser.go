@@ -74,6 +74,7 @@ func New(lexer *lexer.Lexer) *Parser {
 	parser.registerPrefix(token.INT, parser.parseIntegerLiteral)
 	parser.registerPrefix(token.BANG, parser.parsePrefixExpression)
 	parser.registerPrefix(token.MINUS, parser.parsePrefixExpression)
+	parser.registerPrefix(token.PLUS, parser.parsePrefixExpression)
 	parser.registerPrefix(token.TRUE, parser.parseBooleanLiteral)
 	parser.registerPrefix(token.FALSE, parser.parseBooleanLiteral)
 	parser.registerPrefix(token.LPAREN, parser.parseGroupedExpression)
