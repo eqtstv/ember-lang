@@ -56,6 +56,12 @@ func TestEvalBooleanExpression(t *testing.T) {
 		{"(1 < 2) == false", false},
 		{"(1 > 2) == true", false},
 		{"(1 > 2) == false", true},
+		{"(10 <= 10) == true", true},
+		{"(10 >= 10) == true", true},
+		{"(10 < 10) == true", false},
+		{"(10 > 10) == true", false},
+		{"(10 == 10) == true", true},
+		{"(10 != 10) == false", true},
 	}
 	for _, tt := range tests {
 		evaluated := testEval(tt.input)
@@ -93,6 +99,10 @@ func TestIfElseExpressions(t *testing.T) {
 		{"if (1 > 2) { 10 }", nil},
 		{"if (1 > 2) { 10 } else { 20 }", 20},
 		{"if (1 < 2) { 10 } else { 20 }", 10},
+		{"if (1 <= 1) { 10 } else { 20 }", 10},
+		{"if (1 >= 1) { 10 } else { 20 }", 10},
+		{"if (1 <= 2) { 10 } else { 20 }", 10},
+		{"if (1 >= 2) { 10 } else { 20 }", 20},
 	}
 
 	for _, tt := range tests {
@@ -122,6 +132,13 @@ func TestReturnStatements(t *testing.T) {
 				}
 			return 1;
 			}
+		`,
+			10},
+		{`
+			if (10 <= 10) {
+				return 10;
+			}
+			return 20;
 		`,
 			10},
 	}
@@ -598,5 +615,50 @@ func TestHashIndexExpressions(t *testing.T) {
 		} else {
 			testNullObject(t, evaluated)
 		}
+	}
+}
+
+func TestOrEqualOperator(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{"5 <= 5", true},
+		{"4 <= 5", true},
+		{"6 <= 5", false},
+		{"10 <= 10", true},
+		{"10 >= 9", true},
+		{"10 >= 10", true},
+		{"10 >= 11", false},
+		{"10 <= 9", false},
+		{"10 <= 10", true},
+		{"10 <= 11", true},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testBooleanObject(t, evaluated, tt.expected)
+	}
+}
+
+func TestFibo(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{`
+			let fib = fn(n) {
+				if (n <= 1) {
+					return n;
+				}
+				return fib(n - 1) + fib(n - 2);
+			};
+			fib(10);
+		`, 55},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testIntegerObject(t, evaluated, tt.expected)
 	}
 }
