@@ -41,17 +41,15 @@ let max = fn(a, b) {
 };
 
 // Functions and closures
-let makeCounter = fn() {
-    let count = 0;
-    return fn() {
-        count = count + 1;
-        return count;
+let makeAdder = fn(x) {
+    return fn(y) {
+        return x + y;
     };
 };
 
-let counter = makeCounter();
-counter();  // Returns 1
-counter();  // Returns 2
+let addFive = makeAdder(5);
+addFive(10);   // Returns 15
+addFive(20);   // Returns 25
 
 // Recursive functions
 let fib = fn(n) {
