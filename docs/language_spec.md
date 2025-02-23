@@ -97,3 +97,72 @@ The interpreter reports:
 - Type errors during evaluation
 - Undefined variable references
 - Invalid operator usage
+
+## Built-in Functions
+
+### Array Operations
+
+- `len(array)`: Returns length of array or string
+- `push(array, item)`: Adds item to array, returns new array
+- `map(array, fn)`: Applies function to each element
+- `reduce(array, fn, initial)`: Reduces array to single value
+
+### Arithmetic Functions
+
+- `add(x, y)`: Adds two integers
+- `sub(x, y)`: Subtracts two integers
+- `mul(x, y)`: Multiplies two integers
+- `div(x, y)`: Divides two integers
+
+### Utility Functions
+
+- `print(...args)`: Prints arguments to stdout
+- `len(arg)`: Returns length of strings or arrays
+
+### Examples
+
+```typescript
+// Array operations
+let nums = [1, 2, 3, 4, 5];
+let doubled = map(nums, fn(x) { x * 2 });
+let sum = reduce(nums, add, 0);
+
+// Function composition
+let numbers = [1, 2, 3, 4, 5];
+let square = fn(x) { x * x };
+let squares = map(numbers, square);
+let sumOfSquares = reduce(squares, add, 0);
+
+// Built-in arithmetic
+let result = add(mul(5, 2), div(10, 2));  // 15
+```
+
+## Type System
+
+Currently supported types:
+
+- Integers: Whole numbers (`5`, `10`, `-3`)
+- Booleans: `true` or `false`
+- Arrays: Ordered collections (`[1, 2, 3]`)
+- Functions: First-class closures
+- Null: Represents absence of value
+
+### Array Type
+
+Arrays are:
+
+- Zero-indexed
+- Homogeneous (same type recommended)
+- Immutable (operations return new arrays)
+- Support built-in operations (map, reduce, push)
+
+## Error Handling
+
+The interpreter reports:
+
+- Syntax errors during parsing
+- Type errors during evaluation
+- Undefined variable references
+- Invalid operator usage
+- Invalid function arguments
+- Array operation errors

@@ -6,9 +6,11 @@ Ember is an interpreted programming language implemented in Go, designed to be s
 
 - C-like syntax with modern conveniences
 - First-class functions and closures
-- Dynamic typing with integers, booleans, and functions
+- Dynamic typing with integers, booleans, arrays, hashes, and functions
 - Lexical scoping and proper closures
 - Built-in integer arithmetic and boolean operations
+- Array operations (map, reduce, push)
+- Built-in functions for common operations
 - Variables with `let` keyword
 - Control flow (`if`/`else`)
 - Return statements
@@ -24,6 +26,21 @@ Basic examples:
 let age = 25;
 let temperature = 18 + 5;
 let isHot = temperature > 20;
+
+// Arrays
+let numbers = [1, 2, 3, 4, 5];
+let doubled = numbers.map(fn(x) { x * 2 });  // [2, 4, 6, 8, 10]
+let sum = numbers.reduce(fn(acc, x) { acc + x }, 0);  // 15
+numbers.push(6);  // [1, 2, 3, 4, 5, 6]
+
+// Hashes
+let person = {
+    "name": "John",
+    "age": 30,
+    "city": "New York"
+};
+let name = person["name"];  // "John"
+person["country"] = "USA";  // Add new key-value pair
 
 // Functions
 let greet = fn(name) {

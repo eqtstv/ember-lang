@@ -116,9 +116,13 @@ func TestSourceCodeWithReturns(t *testing.T) {
   return true;
   } else {
   return false;
-  }
+  };
   10 == 10;
   10 != 9;
+  "foobar";
+  "foo bar";
+  [1, 2, 3];
+  {"foo": "bar"};
   `
 
 	tests := []struct {
@@ -190,6 +194,7 @@ func TestSourceCodeWithReturns(t *testing.T) {
 		{token.FALSE, "false"},
 		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},
+		{token.SEMICOLON, ";"},
 		{token.INT, "10"},
 		{token.EQ, "=="},
 		{token.INT, "10"},
@@ -197,6 +202,24 @@ func TestSourceCodeWithReturns(t *testing.T) {
 		{token.INT, "10"},
 		{token.NEQ, "!="},
 		{token.INT, "9"},
+		{token.SEMICOLON, ";"},
+		{token.STRING, "foobar"},
+		{token.SEMICOLON, ";"},
+		{token.STRING, "foo bar"},
+		{token.SEMICOLON, ";"},
+		{token.LBRACKET, "["},
+		{token.INT, "1"},
+		{token.COMMA, ","},
+		{token.INT, "2"},
+		{token.COMMA, ","},
+		{token.INT, "3"},
+		{token.RBRACKET, "]"},
+		{token.SEMICOLON, ";"},
+		{token.LBRACE, "{"},
+		{token.STRING, "foo"},
+		{token.COLON, ":"},
+		{token.STRING, "bar"},
+		{token.RBRACE, "}"},
 		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
