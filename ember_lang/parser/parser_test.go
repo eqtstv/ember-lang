@@ -1,8 +1,8 @@
 package parser
 
 import (
-	"ember_lang/internal/ast"
-	"ember_lang/internal/lexer"
+	"ember_lang/ember_lang/ast"
+	"ember_lang/ember_lang/lexer"
 	"testing"
 )
 

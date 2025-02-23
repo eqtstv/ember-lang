@@ -4,7 +4,7 @@ build:
 	@go build -o bin/ember ./cmd/ember
 
 test:
-	@go test ./internal/...
+	@go test ./ember_lang/...
 
 lint:
 	@golangci-lint run

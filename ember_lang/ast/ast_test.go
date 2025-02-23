@@ -1,7 +1,7 @@
 package ast
 
 import (
-	"ember_lang/internal/token"
+	"ember_lang/ember_lang/token"
 	"testing"
 )
 

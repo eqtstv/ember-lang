@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io"
 
-	"ember_lang/internal/lexer"
-	"ember_lang/internal/parser"
+	"ember_lang/ember_lang/lexer"
+	"ember_lang/ember_lang/parser"
 )
 
 const (
