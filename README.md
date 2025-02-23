@@ -1,48 +1,84 @@
 # Ember Programming Language
 
-Ember is an interpreted programming language implemented in Go. It's designed to be simple yet powerful, featuring a C-like syntax.
+Ember is an interpreted programming language implemented in Go, designed to be simple yet powerful with a focus on readability and expressiveness.
 
 ## Features
 
-- C-like syntax
+- C-like syntax with modern conveniences
+- First-class functions and closures
+- Integer arithmetic and boolean operations
 - Variables with `let` keyword
-- First-class functions
-- Integer arithmetic
-- Boolean operations
-- Comparison operators
 - Control flow (`if`/`else`)
 - Return statements
+- Operator precedence parsing
 
-## Example Code
+## Quick Start
 
+1. Clone the repository and navigate to the project directory:
+
+```bash
+cd ember_lang
 ```
-let add = fn(a, b) {
-    a + b;
-};
 
-add(5, 10);
+2. Build and start the REPL:
 
-let x = 10;
+```bash
+make build
+make run
+```
 
-if (x > 5) {
-    return true;
-} else {
-    return false;
-}
+3. Try some examples in the REPL:
+
+```ember
+⟶ let x = 10;
+⟶ let y = 5;
+⟶ let add = fn(a, b) { a + b; };
+⟶ add(x, y);
+15
 ```
 
 ## Project Structure
 
-- `/lexer` - Tokenizes source code into tokens
-- `/token` - Defines token types and structures
-- `/repl` - Interactive shell for testing the language
-
-## Running the REPL
-
-To start the interactive shell:
-
-```bash
-go run main.go
+```
+ember_lang/
+├── cmd/ember/         # Command-line interface
+├── ember_lang/        # Implementation
+│   ├── lexer/         # Tokenization
+│   ├── parser/        # Syntax analysis
+│   ├── ast/           # Abstract Syntax Tree
+│   ├── token/         # Token definitions
+│   └── repl/          # Interactive shell
+└── docs/              # Documentation
+└── examples/          # Example code
 ```
 
-You'll see a prompt `->` where you can type Ember code and see it tokenized.
+## Development
+
+Requirements:
+
+- Go 1.21 or later
+- Make
+
+Common tasks:
+
+```bash
+make build    # Build the ember binary
+make test     # Run tests
+make lint     # Run linter
+make run      # Run the REPL
+```
+
+## Language Syntax
+
+Basic example:
+
+```
+let fib = fn(n) {
+    if (n <= 1) {
+        return n;
+    }
+    return fib(n - 1) + fib(n - 2);
+};
+
+let result = fib(10);  // Calculate 10th Fibonacci number
+```

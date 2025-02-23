@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"ember_lang/ast"
+	"ember_lang/ember_lang/ast"
 	"strconv"
 	"testing"
 )

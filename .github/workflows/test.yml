@@ -19,7 +19,7 @@ jobs:
         go-version: '1.21'
 
     - name: Run Tests
-      run: go test -v ./...
+      run: make test
 
     - name: Run Linter
       uses: golangci/golangci-lint-action@v3

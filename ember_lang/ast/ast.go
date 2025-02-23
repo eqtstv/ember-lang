@@ -2,7 +2,7 @@ package ast
 
 import (
 	"bytes"
-	"ember_lang/token"
+	"ember_lang/ember_lang/token"
 	"strings"
 )
 
