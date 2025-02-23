@@ -6,11 +6,14 @@ Ember is an interpreted programming language implemented in Go, designed to be s
 
 - C-like syntax with modern conveniences
 - First-class functions and closures
-- Integer arithmetic and boolean operations
+- Dynamic typing with integers, booleans, and functions
+- Lexical scoping and proper closures
+- Built-in integer arithmetic and boolean operations
 - Variables with `let` keyword
 - Control flow (`if`/`else`)
 - Return statements
 - Operator precedence parsing
+- REPL with error reporting
 
 ## Quick Start
 
@@ -35,6 +38,13 @@ make run
 ⟶ let add = fn(a, b) { a + b; };
 ⟶ add(x, y);
 15
+
+⟶ let makeAdder = fn(x) {
+      fn(y) { x + y };
+  };
+⟶ let addFive = makeAdder(5);
+⟶ addFive(10);
+15
 ```
 
 ## Project Structure
@@ -43,13 +53,15 @@ make run
 ember_lang/
 ├── cmd/ember/         # Command-line interface
 ├── ember_lang/        # Implementation
-│   ├── lexer/         # Tokenization
-│   ├── parser/        # Syntax analysis
-│   ├── ast/           # Abstract Syntax Tree
-│   ├── token/         # Token definitions
-│   └── repl/          # Interactive shell
-└── docs/              # Documentation
-└── examples/          # Example code
+│   ├── lexer/        # Tokenization
+│   ├── parser/       # Syntax analysis
+│   ├── ast/          # Abstract Syntax Tree
+│   ├── token/        # Token definitions
+│   ├── object/       # Runtime object system
+│   ├── evaluator/    # Expression evaluation
+│   └── repl/         # Interactive shell
+└── docs/             # Documentation
+└── examples/         # Example code
 ```
 
 ## Development
@@ -70,9 +82,23 @@ make run      # Run the REPL
 
 ## Language Syntax
 
-Basic example:
+Basic examples:
 
-```
+```ember
+// Functions and closures
+let makeCounter = fn() {
+    let count = 0;
+    return fn() {
+        count = count + 1;
+        return count;
+    };
+};
+
+let counter = makeCounter();
+counter();  // Returns 1
+counter();  // Returns 2
+
+// Recursive functions
 let fib = fn(n) {
     if (n <= 1) {
         return n;
