@@ -32,17 +32,9 @@ make run
 ```ember
 ⟶ let x = 10;
 ⟶ let y = 5;
-⟶ let add = fn(a, b) { return a + b; };  # Functions with explicit return
+⟶ let add = fn(a, b) { a + b; };
 ⟶ add(x, y);
 15
-
-⟶ # Try a conditional
-⟶ let max = fn(a, b) {
-    if (a > b) { return a; }
-    return b;
-};
-⟶ max(10, 5);
-10
 ```
 
 ## Project Structure
