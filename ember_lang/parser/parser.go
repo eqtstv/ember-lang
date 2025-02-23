@@ -421,7 +421,7 @@ func (parser *Parser) parseExpression(precedence int) ast.Expression {
 }
 
 func (parser *Parser) noPrefixParseFnError(t token.TokenType) {
-	message := fmt.Sprintf("no prefix parse function for %s found", t)
+	message := fmt.Sprintf("\x1b[31mNo prefix parse function for %s found\x1b[0m", t)
 	parser.errors = append(parser.errors, message)
 }
 
