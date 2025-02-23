@@ -40,7 +40,7 @@ func executeFile(path string) {
 	}
 
 	if debug {
-		fmt.Printf("\n=== Source Code ===\n%s\n", string(code))
+		fmt.Printf("\n========================= Source Code =========================\n%s\n", string(code))
 	}
 
 	// Lexical analysis
