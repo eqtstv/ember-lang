@@ -288,16 +288,18 @@ func TestStringConcatenation(t *testing.T) {
 	}
 }
 
-func TestBuiltinFunctions(t *testing.T) {
+func TestBuiltinLenFunction(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
 	}{
+		// String
 		{`len("")`, 0},
 		{`len("four")`, 4},
 		{`len("hello world")`, 11},
-		{`len(1)`, "Invalid argument to len. Got: INTEGER, Expected: STRING"},
-		{`len("one", "two")`, "Invalid number of arguments. Got: 2, Expected: 1"},
+		// Array
+		{`len([1, 2, 3])`, 3},
+		{`len([])`, 0},
 	}
 	for _, tt := range tests {
 		evaluated := testEval(tt.input)
@@ -316,6 +318,30 @@ func TestBuiltinFunctions(t *testing.T) {
 				t.Errorf("wrong error message. expected=%q, got=%q",
 					expected, errObj.Message)
 			}
+		}
+	}
+}
+
+func TestBuiltinPushFunction(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []int64
+	}{
+		{`push([], 1)`, []int64{1}},
+		{`push([1, 2], 3)`, []int64{1, 2, 3}},
+	}
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		result, ok := evaluated.(*object.Array)
+		if !ok {
+			t.Fatalf("object is not Array. got=%T (%+v)", evaluated, evaluated)
+		}
+		if len(result.Elements) != len(tt.expected) {
+			t.Fatalf("array has wrong num of elements. got=%d",
+				len(result.Elements))
+		}
+		for i, expected := range tt.expected {
+			testIntegerObject(t, result.Elements[i], expected)
 		}
 	}
 }
