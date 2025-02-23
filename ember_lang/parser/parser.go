@@ -74,6 +74,7 @@ func New(lexer *lexer.Lexer) *Parser {
 	parser.registerPrefix(token.INT, parser.parseIntegerLiteral)
 	parser.registerPrefix(token.BANG, parser.parsePrefixExpression)
 	parser.registerPrefix(token.MINUS, parser.parsePrefixExpression)
+	parser.registerPrefix(token.PLUS, parser.parsePrefixExpression)
 	parser.registerPrefix(token.TRUE, parser.parseBooleanLiteral)
 	parser.registerPrefix(token.FALSE, parser.parseBooleanLiteral)
 	parser.registerPrefix(token.LPAREN, parser.parseGroupedExpression)
@@ -420,7 +421,7 @@ func (parser *Parser) parseExpression(precedence int) ast.Expression {
 }
 
 func (parser *Parser) noPrefixParseFnError(t token.TokenType) {
-	message := fmt.Sprintf("no prefix parse function for %s found", t)
+	message := fmt.Sprintf("\x1b[31mNo prefix parse function for %s found\x1b[0m", t)
 	parser.errors = append(parser.errors, message)
 }
 
