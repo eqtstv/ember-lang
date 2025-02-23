@@ -427,3 +427,28 @@ func TestArrayIndexExpressions(t *testing.T) {
 		}
 	}
 }
+
+func TestMapFunction(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []int64
+	}{
+		{`map([1, 2, 3], fn(x) { x * 2; })`, []int64{2, 4, 6}},
+		{`map([1, 2, 3, 4, 5], fn(x) { x * x; })`, []int64{1, 4, 9, 16, 25}},
+	}
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		result, ok := evaluated.(*object.Array)
+		if !ok {
+			t.Fatalf("object is not Array. got=%T (%+v)", evaluated, evaluated)
+		}
+		if len(result.Elements) != len(tt.expected) {
+			t.Fatalf("array has wrong num of elements. Got=%d, Expected=%d",
+				len(result.Elements), len(tt.expected))
+		}
+
+		for i, expected := range tt.expected {
+			testIntegerObject(t, result.Elements[i], expected)
+		}
+	}
+}
