@@ -27,6 +27,21 @@ let age = 25;
 let temperature = 18 + 5;
 let isHot = temperature > 20;
 
+// Arrays
+let numbers = [1, 2, 3, 4, 5];
+let doubled = numbers.map(fn(x) { x * 2 });  // [2, 4, 6, 8, 10]
+let sum = numbers.reduce(fn(acc, x) { acc + x }, 0);  // 15
+numbers.push(6);  // [1, 2, 3, 4, 5, 6]
+
+// Hashes
+let person = {
+    "name": "John",
+    "age": 30,
+    "city": "New York"
+};
+let name = person["name"];  // "John"
+person["country"] = "USA";  // Add new key-value pair
+
 // Functions
 let greet = fn(name) {
     return "Hello, " + name + "!";
