@@ -9,7 +9,11 @@ import (
 	"ember_lang/token"
 )
 
-const PROMPT = "-> "
+const (
+	CYAN   = "\033[1;96m"
+	RESET  = "\033[0m"
+	PROMPT = CYAN + "⟶ " + RESET
+)
 
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
