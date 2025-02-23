@@ -25,7 +25,7 @@ type Expression interface {
 // ------------------------------------- Identifier -------------------------------------
 
 type Identifier struct {
-	Token token.Token // token.IDENT token
+	Token token.Token // token.IDENTIFIER token
 	Value string
 }
 
@@ -122,7 +122,7 @@ func (rs *ReturnStatement) String() string {
 // ------------------------------------- ExpressionStatement -------------------------------------
 
 type ExpressionStatement struct {
-	Token      token.Token // token.IDENT token
+	Token      token.Token // token.IDENTIFIER token
 	Expression Expression
 }
 

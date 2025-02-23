@@ -69,7 +69,7 @@ func New(lexer *lexer.Lexer) *Parser {
 
 	// Prefix parse functions
 	parser.prefixParseFns = make(map[token.TokenType]PrefixParseFn)
-	parser.registerPrefix(token.IDENT, parser.parseIdentifier)
+	parser.registerPrefix(token.IDENTIFIER, parser.parseIdentifier)
 	parser.registerPrefix(token.INT, parser.parseIntegerLiteral)
 	parser.registerPrefix(token.BANG, parser.parsePrefixExpression)
 	parser.registerPrefix(token.MINUS, parser.parsePrefixExpression)
@@ -262,7 +262,7 @@ func (parser *Parser) parseStatement() ast.Statement {
 func (parser *Parser) parseLetStatement() *ast.LetStatement {
 	stmt := &ast.LetStatement{Token: parser.curToken}
 
-	if !parser.expectPeek(token.IDENT) {
+	if !parser.expectPeek(token.IDENTIFIER) {
 		return nil
 	}
 
