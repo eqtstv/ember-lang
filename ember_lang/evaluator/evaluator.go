@@ -292,13 +292,17 @@ func evalIndexExpression(left object.Object, index object.Object) object.Object 
 
 func evalArrayIndexExpression(array object.Object, index object.Object) object.Object {
 	arrayObject := array.(*object.Array)
-	indexObject := index.(*object.Integer)
+	indexValue := index.(*object.Integer).Value
 
-	if indexObject.Value < 0 || indexObject.Value >= int64(len(arrayObject.Elements)) {
+	if indexValue < 0 {
+		indexValue = int64(len(arrayObject.Elements)) + indexValue
+	}
+
+	if indexValue < 0 || indexValue >= int64(len(arrayObject.Elements)) {
 		return NULL
 	}
 
-	return arrayObject.Elements[indexObject.Value]
+	return arrayObject.Elements[indexValue]
 }
 
 func evalStringInfixExpression(operator string, left object.Object, right object.Object) object.Object {
