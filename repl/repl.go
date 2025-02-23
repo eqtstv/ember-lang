@@ -6,10 +6,14 @@ import (
 	"io"
 
 	"ember_lang/lexer"
-	"ember_lang/token"
+	"ember_lang/parser"
 )
 
-const PROMPT = "-> "
+const (
+	CYAN   = "\033[1;96m"
+	RESET  = "\033[0m"
+	PROMPT = CYAN + "⟶ " + RESET
+)
 
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
@@ -23,10 +27,27 @@ func Start(in io.Reader, out io.Writer) {
 		}
 
 		line := scanner.Text()
-		l := lexer.New(line)
 
-		for tok := l.NextToken(); tok.Type != token.EOF; tok = l.NextToken() {
-			fmt.Fprintf(out, "%+v\n", tok)
+		lexer := lexer.New(line)
+		parser := parser.New(lexer)
+		program := parser.ParseProgram()
+
+		if len(parser.Errors()) != 0 {
+			printParserErrors(out, parser.Errors())
+			continue
 		}
+
+		_, _ = io.WriteString(out, program.String())
+		_, _ = io.WriteString(out, "\n")
+
+	}
+}
+
+func printParserErrors(out io.Writer, errors []string) {
+	_, _ = io.WriteString(out, "\x1b[31mFailed to parse program!\x1b[0m\n")
+	_, _ = io.WriteString(out, "\x1b[31mParser errors:\x1b[0m\n")
+
+	for _, msg := range errors {
+		_, _ = io.WriteString(out, "\t"+msg+"\n")
 	}
 }

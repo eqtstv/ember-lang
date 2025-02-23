@@ -11,9 +11,8 @@ const (
 	ILLEGAL = "ILLEGAL"
 	EOF     = "EOF"
 
-	// Indent + Literal
-	IDENT = "IDENT" // add, foobar, x, y
-	INT   = "INT"
+	IDENTIFIER = "IDENTIFIER" // add, foobar, x, y
+	INT        = "INT"
 
 	// Operators
 	ASSIGN   = "="
@@ -60,9 +59,9 @@ var keywords = map[string]TokenType{
 	"return": RETURN,
 }
 
-func LookupIdent(ident string) TokenType {
-	if tok, ok := keywords[ident]; ok {
-		return tok
+func LookupIdentifier(identifier string) TokenType {
+	if tokenType, ok := keywords[identifier]; ok {
+		return tokenType
 	}
-	return IDENT
+	return IDENTIFIER
 }
