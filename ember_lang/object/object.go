@@ -9,9 +9,10 @@ import "fmt"
 type ObjectType string
 
 const (
-	INTEGER_OBJ ObjectType = "INTEGER"
-	BOOLEAN_OBJ ObjectType = "BOOLEAN"
-	NULL_OBJ    ObjectType = "NULL"
+	INTEGER_OBJ      ObjectType = "INTEGER"
+	BOOLEAN_OBJ      ObjectType = "BOOLEAN"
+	NULL_OBJ         ObjectType = "NULL"
+	RETURN_VALUE_OBJ ObjectType = "RETURN_VALUE"
 )
 
 // ----------------------------------------------------------------------------
@@ -66,4 +67,20 @@ func (n *Null) Type() ObjectType {
 
 func (n *Null) Inspect() string {
 	return "null"
+}
+
+// ----------------------------------------------------------------------------
+// ReturnValue Object
+// ----------------------------------------------------------------------------
+
+type ReturnValue struct {
+	Value Object
+}
+
+func (r *ReturnValue) Type() ObjectType {
+	return RETURN_VALUE_OBJ
+}
+
+func (r *ReturnValue) Inspect() string {
+	return r.Value.Inspect()
 }
