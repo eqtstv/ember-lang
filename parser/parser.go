@@ -340,13 +340,13 @@ func (parser *Parser) parseStatement() ast.Statement {
 }
 
 func (parser *Parser) parseLetStatement() *ast.LetStatement {
-	stmt := &ast.LetStatement{Token: parser.curToken}
+	statement := &ast.LetStatement{Token: parser.curToken}
 
 	if !parser.expectPeek(token.IDENTIFIER) {
 		return nil
 	}
 
-	stmt.Name = &ast.Identifier{
+	statement.Name = &ast.Identifier{
 		Token: parser.curToken,
 		Value: parser.curToken.Literal,
 	}
@@ -355,12 +355,15 @@ func (parser *Parser) parseLetStatement() *ast.LetStatement {
 		return nil
 	}
 
-	// TODO: We are skipping the expressions until we encounter a semicolon
-	for !parser.curTokenIs(token.SEMICOLON) {
+	parser.nextToken()
+
+	statement.Value = parser.parseExpression(LOWEST)
+
+	if parser.peekTokenIs(token.SEMICOLON) {
 		parser.nextToken()
 	}
 
-	return stmt
+	return statement
 }
 
 func (parser *Parser) parseReturnStatement() *ast.ReturnStatement {
@@ -368,8 +371,9 @@ func (parser *Parser) parseReturnStatement() *ast.ReturnStatement {
 
 	parser.nextToken()
 
-	// TODO: We are skipping the expressions until we encounter a semicolon
-	for !parser.curTokenIs(token.SEMICOLON) {
+	statement.ReturnValue = parser.parseExpression(LOWEST)
+
+	if parser.peekTokenIs(token.SEMICOLON) {
 		parser.nextToken()
 	}
 

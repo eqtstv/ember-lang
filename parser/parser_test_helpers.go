@@ -9,7 +9,7 @@ import (
 func testIntegerLiteral(t *testing.T, il ast.Expression, value int64) bool {
 	integer, ok := il.(*ast.IntegerLiteral)
 	if !ok {
-		t.Errorf("il not *ast.IntegerLiteral. got=%T", il)
+		t.Errorf("integerLiteral not *ast.IntegerLiteral. got=%T", il)
 		return false
 	}
 
@@ -138,6 +138,30 @@ func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 
 	if letStmt.Name.TokenLiteral() != name {
 		t.Errorf("letStmt.Name.TokenLiteral() not '%s'. got=%s", name, letStmt.Name.TokenLiteral())
+		return false
+	}
+
+	return true
+}
+
+func testReturnStatement(t *testing.T, s ast.Statement, value int64) bool {
+	if s.TokenLiteral() != "return" {
+		t.Errorf("s.TokenLiteral() not 'return'. got=%q", s.TokenLiteral())
+		return false
+	}
+
+	returnStmt, ok := s.(*ast.ReturnStatement)
+	if !ok {
+		t.Errorf("s not *ast.ReturnStatement. got=%T", s)
+		return false
+	}
+
+	if returnStmt.TokenLiteral() != "return" {
+		t.Errorf("returnStmt.TokenLiteral() not 'return'. got=%q", returnStmt.TokenLiteral())
+		return false
+	}
+
+	if !testLiteralExpression(t, returnStmt.ReturnValue, value) {
 		return false
 	}
 

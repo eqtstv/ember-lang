@@ -7,67 +7,65 @@ import (
 )
 
 func TestLetStatements(t *testing.T) {
-	input := `
-	let x = 5;
-	let y = 10;
-	`
-
-	l := lexer.New(input)
-	p := New(l)
-
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
-
-	if program == nil {
-		t.Fatalf("ParseProgram() returned nil")
-	}
-
-	if len(program.Statements) != 2 {
-		t.Fatalf("program.Statements does not contain 2 statements. got=%d", len(program.Statements))
-	}
-
 	tests := []struct {
+		input              string
 		expectedIdentifier string
+		expectedValue      interface{}
 	}{
-		{"x"},
-		{"y"},
+		{"let x = 5;", "x", 5},
+		{"let y = true;", "y", true},
+		{"let foobar = y;", "foobar", "y"},
 	}
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
 
-	for i, tt := range tests {
-		stmt := program.Statements[i]
-		if !testLetStatement(t, stmt, tt.expectedIdentifier) {
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements does not contain 1 statements. got=%d",
+				len(program.Statements))
+		}
+
+		statement := program.Statements[0]
+		if !testLetStatement(t, statement, tt.expectedIdentifier) {
 			return
 		}
 
+		value := statement.(*ast.LetStatement).Value
+		if !testLiteralExpression(t, value, tt.expectedValue) {
+			return
+		}
 	}
 }
 
 func TestReturnStatements(t *testing.T) {
-	input := `
-	return 5;
-	return 10;
-	return 69420;
-	`
-
-	l := lexer.New(input)
-	p := New(l)
-
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
-
-	if len(program.Statements) != 3 {
-		t.Fatalf("program.Statements does not contain 3 statements. got=%d", len(program.Statements))
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{"return 5;", 5},
+		{"return 10;", 10},
+		{"return 69420;", 69420},
 	}
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
 
-	for _, stmt := range program.Statements {
-		returnStmt, ok := stmt.(*ast.ReturnStatement)
-
-		if !ok {
-			t.Errorf("stmt not *ast.ReturnStatement. got=%T", stmt)
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements does not contain 1 statements. got=%d", len(program.Statements))
 		}
 
-		if returnStmt.TokenLiteral() != "return" {
-			t.Errorf("returnStmt.TokenLiteral() not 'return'. got=%q", returnStmt.TokenLiteral())
+		statement := program.Statements[0]
+		if !testReturnStatement(t, statement, tt.expected) {
+			return
+		}
+
+		value := statement.(*ast.ReturnStatement).ReturnValue
+		if !testLiteralExpression(t, value, tt.expected) {
+			return
 		}
 	}
 }
