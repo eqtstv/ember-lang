@@ -68,5 +68,46 @@ func init() {
 				return newArray
 			},
 		},
+		"reduce": {
+			Fn: func(args ...object.Object) object.Object {
+				if len(args) != 3 {
+					return newError("Invalid number of arguments. Got: %d, Expected: 3", len(args))
+				}
+
+				array, ok := args[0].(*object.Array)
+				if !ok {
+					return newError("Invalid argument to reduce. Got: %s, Expected: ARRAY", args[0].Type())
+				}
+
+				function, ok := args[1].(*object.Function)
+				if !ok {
+					return newError("Invalid argument to reduce. Got: %s, Expected: FUNCTION", args[1].Type())
+				}
+
+				initialValue, ok := args[2].(*object.Integer)
+				if !ok {
+					return newError("Invalid argument to reduce. Got: %s, Expected: INTEGER", args[1].Type())
+				}
+
+				for index, elem := range array.Elements {
+					if elem.Type() != object.INTEGER_OBJ {
+						return newError("Invalid argument to reduce at index %d. Got: %s, Expected: INTEGER", index, elem.Type())
+					}
+
+					result := applyFunction(function, []object.Object{initialValue, elem})
+					if isError(result) {
+						return result
+					}
+
+					resultInt, ok := result.(*object.Integer)
+					if !ok {
+						return newError("Reduce function must return INTEGER, got: %s", result.Type())
+					}
+					initialValue = resultInt
+				}
+
+				return initialValue
+			},
+		},
 	}
 }

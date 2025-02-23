@@ -452,3 +452,21 @@ func TestMapFunction(t *testing.T) {
 		}
 	}
 }
+
+func TestReduceFunction(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{`reduce([1, 2, 3], fn(acc, x) { acc + x; }, 0)`, 6},
+		{`reduce([1, 2, 3], fn(acc, x) { acc + x; }, 1)`, 7},
+		{`reduce([1, 2, 3], fn(acc, x) { acc * x; }, 1)`, 6},
+		{`reduce([1, 2, 3], fn(acc, x) { acc * x; }, 0)`, 0},
+		{`reduce([1, 2, 3], fn(acc, x) { acc * x; }, 1)`, 6},
+	}
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
