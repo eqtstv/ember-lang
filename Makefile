@@ -1,4 +1,4 @@
-.PHONY: build test lint
+.PHONY: build test lint install
 
 build:
 	@go build -o bin/ember ./cmd/ember
@@ -11,3 +11,7 @@ lint:
 
 run:
 	@go run ./cmd/ember
+
+install: build
+	@sudo cp bin/ember /usr/local/bin/ember
+	@echo "Ember installed to /usr/local/bin/ember"

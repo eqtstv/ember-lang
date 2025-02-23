@@ -166,3 +166,46 @@ The interpreter reports:
 - Invalid operator usage
 - Invalid function arguments
 - Array operation errors
+
+## Command Line Interface
+
+The Ember interpreter can be used in two modes:
+
+### REPL Mode
+
+```bash
+ember
+```
+
+Starts an interactive shell where you can type and evaluate Ember code directly.
+
+### File Execution Mode
+
+```bash
+ember filename.em
+```
+
+Executes an Ember source file. Files must have the `.em` extension.
+
+## File Format
+
+Ember source files:
+
+- Must have the `.em` extension
+- Are UTF-8 encoded
+- Use semicolons (;) as statement terminators
+- Support both single-line and multi-line comments
+
+Example:
+
+```typescript
+// Single line comment
+/* Multi-line
+   comment */
+
+let main = fn() {
+    // Your code here
+};
+
+main();
+```

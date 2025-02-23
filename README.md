@@ -79,36 +79,83 @@ let fib = fn(n) {
 let result = fib(10);  // Calculate 10th Fibonacci number
 ```
 
-## Quick Start
+## Getting Started
 
-1. Clone the repository and navigate to the project directory:
+You can use Ember in two ways:
+
+### Option 1: Quick Start (REPL only)
+
+If you just want to try Ember without installing:
+
+```bash
+cd ember_lang
+make run
+```
+
+This will start the REPL (Read-Eval-Print Loop) interactive shell.
+
+### Option 2: System Installation
+
+For full installation that allows running Ember files from anywhere:
+
+1. Clone the repository:
 
 ```bash
 cd ember_lang
 ```
 
-2. Build and start the REPL:
+2. Install the Ember binary:
 
 ```bash
-make build
-make run
+make install
 ```
 
-3. Try some examples in the REPL:
+This will install the `ember` command to `/usr/local/bin/ember`.
+
+## Usage
+
+There are two ways to use Ember:
+
+### 1. REPL (Interactive Mode)
+
+Start the REPL by running:
+
+```bash
+ember
+```
+
+You'll see:
+
+```
+Ember Programming Language v0.0.1 (prototype)
+Type "help" for more information.
+⟶
+```
+
+### 2. File Execution
+
+Run Ember files (with .em extension):
+
+```bash
+ember fibonacci.em
+```
+
+### Example Program
+
+Create a file `hello.em`:
 
 ```typescript
-⟶ let x = 10;
-⟶ let y = 5;
-⟶ let add = fn(a, b) { a + b; };
-⟶ add(x, y);
-15
+let greet = fn(name) {
+    return "Hello, " + name + "!";
+};
 
-⟶ let makeAdder = fn(x) {
-      fn(y) { x + y };
-  };
-⟶ let addFive = makeAdder(5);
-⟶ addFive(10);
-15
+print(greet("World"));
+```
+
+Run it:
+
+```bash
+ember hello.em
 ```
 
 ## Project Structure
@@ -141,5 +188,6 @@ Common tasks:
 make build    # Build the ember binary
 make test     # Run tests
 make lint     # Run linter
-make run      # Run the REPL
+make run      # Start REPL (during development)
+make install  # Install ember to /usr/local/bin
 ```
