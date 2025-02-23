@@ -1,7 +1,7 @@
 package main
 
 import (
-	"ember_lang/repl"
+	"ember_lang/ember_lang/repl"
 	"fmt"
 	"os"
 )
