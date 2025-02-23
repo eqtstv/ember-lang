@@ -19,7 +19,7 @@ Ember is an interpreted programming language implemented in Go, designed to be s
 
 Basic examples:
 
-```ember
+```typescript
 // Variables and arithmetic
 let age = 25;
 let temperature = 18 + 5;
@@ -81,7 +81,7 @@ make run
 
 3. Try some examples in the REPL:
 
-```ember
+```typescript
 ⟶ let x = 10;
 ⟶ let y = 5;
 ⟶ let add = fn(a, b) { a + b; };
