@@ -1,6 +1,10 @@
 package object
 
-import "fmt"
+import (
+	"bytes"
+	"ember_lang/ember_lang/ast"
+	"fmt"
+)
 
 // ----------------------------------------------------------------------------
 // Object Types
@@ -14,6 +18,7 @@ const (
 	NULL_OBJ         ObjectType = "NULL"
 	RETURN_VALUE_OBJ ObjectType = "RETURN_VALUE"
 	ERROR_OBJ        ObjectType = "ERROR"
+	FUNCTION_OBJ     ObjectType = "FUNCTION"
 )
 
 // ----------------------------------------------------------------------------
@@ -100,4 +105,37 @@ func (e *Error) Type() ObjectType {
 
 func (e *Error) Inspect() string {
 	return "\033[31mERROR: " + e.Message + "\033[0m"
+}
+
+// ----------------------------------------------------------------------------
+// Function Object
+// ----------------------------------------------------------------------------
+
+type Function struct {
+	Parameters []*ast.Identifier
+	Body       *ast.BlockStatement
+	Env        *Environment
+}
+
+func (f *Function) Type() ObjectType {
+	return FUNCTION_OBJ
+}
+
+func (f *Function) Inspect() string {
+	var out bytes.Buffer
+
+	out.WriteString("fn")
+	out.WriteString("(")
+
+	for i, param := range f.Parameters {
+		out.WriteString(param.String())
+		if i != len(f.Parameters)-1 {
+			out.WriteString(", ")
+		}
+	}
+	out.WriteString(") {\n")
+	out.WriteString(f.Body.String())
+	out.WriteString("\n}")
+
+	return out.String()
 }
