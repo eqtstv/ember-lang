@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"ember_lang/ember_lang/ast"
 	"fmt"
+	"hash/fnv"
+	"strings"
 )
 
 // ----------------------------------------------------------------------------
@@ -22,6 +24,7 @@ const (
 	STRING_OBJ       ObjectType = "STRING"
 	BUILTIN_OBJ      ObjectType = "BUILTIN"
 	ARRAY_OBJ        ObjectType = "ARRAY"
+	HASH_OBJ         ObjectType = "HASH"
 )
 
 // ----------------------------------------------------------------------------
@@ -177,7 +180,9 @@ func (b *Builtin) Inspect() string {
 	return "builtin function"
 }
 
-// ------------------------------------- Array Object -------------------------------------
+// ----------------------------------------------------------------------------
+// Array Object
+// ----------------------------------------------------------------------------
 
 type Array struct {
 	Elements []Object
@@ -200,4 +205,68 @@ func (a *Array) Inspect() string {
 	out.WriteString("]")
 
 	return out.String()
+}
+
+// ----------------------------------------------------------------------------
+// HashKey Object
+// ----------------------------------------------------------------------------
+
+type HashKey struct {
+	Type  ObjectType
+	Value uint64
+}
+
+func (b *Boolean) HashKey() HashKey {
+	var result uint64
+
+	if b.Value {
+		result = 1
+	}
+
+	return HashKey{Type: b.Type(), Value: result}
+}
+
+func (i *Integer) HashKey() HashKey {
+	return HashKey{Type: i.Type(), Value: uint64(i.Value)}
+}
+
+func (s *String) HashKey() HashKey {
+	hash := fnv.New64a()
+	hash.Write([]byte(s.Value))
+
+	return HashKey{Type: s.Type(), Value: hash.Sum64()}
+}
+
+// ----------------------------------------------------------------------------
+// Hash Object
+// ----------------------------------------------------------------------------
+
+type Hash struct {
+	Pairs map[HashKey]HashPair
+}
+
+type HashPair struct {
+	Key   Object
+	Value Object
+}
+
+func (h *Hash) Type() ObjectType {
+	return HASH_OBJ
+}
+
+func (h *Hash) Inspect() string {
+	var out bytes.Buffer
+	pairs := []string{}
+	for _, pair := range h.Pairs {
+		pairs = append(pairs, fmt.Sprintf("%s: %s",
+			pair.Key.Inspect(), pair.Value.Inspect()))
+	}
+	out.WriteString("{")
+	out.WriteString(strings.Join(pairs, ", "))
+	out.WriteString("}")
+	return out.String()
+}
+
+type Hashable interface {
+	HashKey() HashKey
 }
