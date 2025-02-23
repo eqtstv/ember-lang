@@ -1,9 +1,9 @@
 package parser
 
 import (
-	"ember_lang/ast"
-	"ember_lang/lexer"
-	"ember_lang/token"
+	"ember_lang/internal/ast"
+	"ember_lang/internal/lexer"
+	"ember_lang/internal/token"
 	"fmt"
 	"strconv"
 )

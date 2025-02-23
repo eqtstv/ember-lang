@@ -1,7 +1,7 @@
 package lexer
 
 import (
-	"ember_lang/token"
+	"ember_lang/internal/token"
 )
 
 type Lexer struct {
