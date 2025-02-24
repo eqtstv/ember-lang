@@ -209,3 +209,49 @@ let main = fn() {
 
 main();
 ```
+
+## Development Tools
+
+### Debug Mode
+
+The interpreter supports a debug mode that provides insight into the compilation and execution process:
+
+```bash
+DEBUG=1 ember program.em
+```
+
+This shows:
+
+1. **Source Code**: The original program text
+2. **Tokens**: The stream of tokens from lexical analysis
+3. **AST**: A visual representation of the Abstract Syntax Tree
+4. **Result**: The final evaluation result
+
+### AST Visualization
+
+The Abstract Syntax Tree shows the hierarchical structure of the program. Each node is color-coded:
+
+- Purple: Keywords and control flow (let, if, return)
+- Blue: Function-related nodes
+- Cyan: Numbers and identifiers
+- Orange: Strings and operators
+- Green: Boolean values
+- White: General expressions
+- Gray: Tree structure
+
+Example:
+
+```
+└── Let Statement
+    ├── Identifier: x
+    └── Infix: +
+        ├── Integer: 5
+        └── Integer: 10
+```
+
+The tree depth indicates:
+
+1. Scope nesting (functions, blocks)
+2. Expression composition
+3. Operator precedence
+4. Control flow structure

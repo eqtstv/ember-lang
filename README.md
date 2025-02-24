@@ -191,3 +191,39 @@ make lint     # Run linter
 make run      # Start REPL (during development)
 make install  # Install ember to /usr/local/bin
 ```
+
+### Debugging
+
+You can enable debug output by setting the DEBUG environment variable:
+
+```bash
+DEBUG=1 ember fibonacci.em
+```
+
+This will show:
+
+1. Source code
+2. Token stream (lexical analysis)
+3. Abstract Syntax Tree (AST)
+4. Final result
+
+The AST visualization shows the hierarchical structure of your code:
+
+```
+└── Program
+    └── Let Statement
+        ├── Identifier: fibonacci
+        └── Function: fn(n)
+            └── Block Statement
+                ├── If Expression
+                │   ├── Infix: <=
+                │   │   ├── Identifier: n
+                │   │   └── Integer: 1
+```
+
+The tree depth indicates:
+
+- Code blocks and scopes
+- Expression nesting
+- Operator precedence
+- Control flow structure
