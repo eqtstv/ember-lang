@@ -17,7 +17,7 @@ const (
 	PROMPT = CYAN + "⟶ " + RESET
 )
 
-func Start(in io.Reader, out io.Writer) {
+func Start(in io.Reader, out io.Writer, debug string) {
 	scanner := bufio.NewScanner(in)
 	env := object.NewEnvironment()
 
@@ -31,9 +31,26 @@ func Start(in io.Reader, out io.Writer) {
 
 		line := scanner.Text()
 
+		if debug == "1" {
+			fmt.Printf("\n========================= Source Code =========================\n%s\n", line)
+		}
+
 		lexer := lexer.New(line)
+
+		if debug == "1" {
+			fmt.Println("\n=========================== Tokens ===========================")
+			for tok := lexer.NextToken(); tok.Type != "EOF"; tok = lexer.NextToken() {
+				fmt.Printf("%+v\n", tok)
+			}
+		}
+
 		parser := parser.New(lexer)
+
 		program := parser.ParseProgram()
+
+		if debug == "1" {
+			fmt.Printf("\n=========================== AST ===========================\n%s\n", program.String())
+		}
 
 		if len(parser.Errors()) != 0 {
 			printParserErrors(out, parser.Errors())
