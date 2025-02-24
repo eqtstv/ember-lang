@@ -689,3 +689,28 @@ func TestEvalArrayInfixExpression(t *testing.T) {
 		}
 	}
 }
+
+func TestEvalBuiltinConcatFunction(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []int64
+	}{
+		{`concat([1, 2, 3], [4, 5, 6])`, []int64{1, 2, 3, 4, 5, 6}},
+		{`concat([1, 2, 3], [])`, []int64{1, 2, 3}},
+		{`concat([], [1, 2, 3])`, []int64{1, 2, 3}},
+		{`concat([], [])`, []int64{}},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		result, ok := evaluated.(*object.Array)
+		if !ok {
+			t.Fatalf("object is not Array. got=%T (%+v)", evaluated, evaluated)
+		}
+
+		for i, expected := range tt.expected {
+			testIntegerObject(t, result.Elements[i], expected)
+		}
+	}
+
+}
