@@ -7,8 +7,9 @@ import (
 type TokenType string
 
 type Token struct {
-	Type    TokenType
-	Literal string
+	Type       TokenType
+	Literal    string
+	LineNumber int
 }
 
 // String returns a colored string representation of the token

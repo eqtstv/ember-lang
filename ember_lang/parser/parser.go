@@ -119,7 +119,7 @@ func (parser *Parser) parseIntegerLiteral() ast.Expression {
 
 	value, err := strconv.ParseInt(parser.curToken.Literal, 0, 64)
 	if err != nil {
-		message := fmt.Sprintf("could not parse %q as integer", parser.curToken.Literal)
+		message := fmt.Sprintf("(line %d) could not parse %q as integer", parser.curToken.LineNumber, parser.curToken.Literal)
 		parser.errors = append(parser.errors, message)
 		return nil
 	}
@@ -342,8 +342,8 @@ func (p *Parser) Errors() []string {
 }
 
 func (p *Parser) peekError(t token.TokenType) {
-	message := fmt.Sprintf("\x1b[31mExpected next token to be: %s, got: %s (%s) instead.\x1b[0m",
-		t, p.peekToken.Type, p.peekToken.Literal)
+	message := fmt.Sprintf("\x1b[31m (line %d) expected next token to be: %s, got: %s (%s) instead.\x1b[0m",
+		p.peekToken.LineNumber, t, p.peekToken.Type, p.peekToken.Literal)
 	p.errors = append(p.errors, message)
 }
 
@@ -486,7 +486,7 @@ func (parser *Parser) parseExpression(precedence int) ast.Expression {
 }
 
 func (parser *Parser) noPrefixParseFnError(t token.TokenType) {
-	message := fmt.Sprintf("\x1b[31mNo prefix parse function for %s found\x1b[0m", t)
+	message := fmt.Sprintf("\x1b[31m (line %d) no prefix parse function for %s found\x1b[0m", parser.curToken.LineNumber, t)
 	parser.errors = append(parser.errors, message)
 }
 
