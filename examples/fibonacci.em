@@ -7,4 +7,4 @@ let fibonacci = fn(n) {
 
 let result = fibonacci(10);
 
-print(result);
+return result;
