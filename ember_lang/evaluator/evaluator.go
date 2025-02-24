@@ -273,6 +273,8 @@ func evalInfixExpression(operator string, left object.Object, right object.Objec
 		return evalIntegerInfixExpression(operator, left, right)
 	case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
 		return evalStringInfixExpression(operator, left, right)
+	case left.Type() == object.ARRAY_OBJ && right.Type() == object.ARRAY_OBJ:
+		return evalArrayInfixExpression(operator, left, right)
 	case operator == "==":
 		return nativeBoolToBooleanObject(left == right)
 	case operator == "!=":
@@ -363,6 +365,17 @@ func evalStringInfixExpression(operator string, left object.Object, right object
 	rightVal := right.(*object.String).Value
 
 	return &object.String{Value: leftVal + rightVal}
+}
+
+func evalArrayInfixExpression(operator string, left object.Object, right object.Object) object.Object {
+	if operator != "+" {
+		return newError("Unknown operator: %s %s %s", left.Type(), operator, right.Type())
+	}
+
+	leftArray := left.(*object.Array)
+	rightArray := right.(*object.Array)
+
+	return &object.Array{Elements: append(leftArray.Elements, rightArray.Elements...)}
 }
 
 func evalIfExpression(node *ast.IfExpression, env *object.Environment) object.Object {

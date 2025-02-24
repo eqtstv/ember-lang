@@ -662,3 +662,30 @@ func TestFibo(t *testing.T) {
 		testIntegerObject(t, evaluated, tt.expected)
 	}
 }
+
+func TestEvalArrayInfixExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []int64
+	}{
+		{`[1, 2, 3] + [4, 5, 6]`, []int64{1, 2, 3, 4, 5, 6}},
+		{`[1, 2, 3] + []`, []int64{1, 2, 3}},
+		{`[] + [1, 2, 3]`, []int64{1, 2, 3}},
+		{`[] + []`, []int64{}},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		result, ok := evaluated.(*object.Array)
+		if !ok {
+			t.Fatalf("object is not Array. got=%T (%+v)", evaluated, evaluated)
+		}
+		if len(result.Elements) != len(tt.expected) {
+			t.Fatalf("array has wrong num of elements. got=%d", len(result.Elements))
+		}
+
+		for i, expected := range tt.expected {
+			testIntegerObject(t, result.Elements[i], expected)
+		}
+	}
+}
