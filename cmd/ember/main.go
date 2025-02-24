@@ -6,6 +6,7 @@ import (
 	"ember_lang/ember_lang/object"
 	"ember_lang/ember_lang/parser"
 	"ember_lang/ember_lang/repl"
+	"ember_lang/logger"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -40,16 +41,14 @@ func executeFile(path string) {
 	}
 
 	if debug == "1" {
-		fmt.Printf("\n========================= Source Code =========================\n%s\n", string(code))
+		logger.LogSourceCode(code)
 	}
 
 	// Lexical analysis
 	l := lexer.New(string(code))
+
 	if debug == "1" {
-		fmt.Println("\n=========================== Tokens ===========================")
-		for tok := l.NextToken(); tok.Type != "EOF"; tok = l.NextToken() {
-			fmt.Printf("%+v\n", tok)
-		}
+		logger.LogTokens(l)
 		l = lexer.New(string(code)) // Reset lexer for parsing
 	}
 
@@ -63,7 +62,7 @@ func executeFile(path string) {
 	}
 
 	if debug == "1" {
-		fmt.Printf("\n=========================== AST ===========================\n%s\n", program.String())
+		logger.LogAST(program)
 	}
 
 	// Evaluation
@@ -71,7 +70,7 @@ func executeFile(path string) {
 	result := evaluator.Eval(program, env)
 
 	if debug == "1" {
-		fmt.Printf("\n=========================== Result ===========================\n")
+		logger.LogResult(result)
 	}
 
 	if result != nil {
