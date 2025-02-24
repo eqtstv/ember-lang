@@ -13,21 +13,52 @@ type Token struct {
 
 // String returns a colored string representation of the token
 func (t Token) String() string {
-	// ANSI escape codes for colors
+	// Atom One Dark theme colors (VS Code TypeScript-like)
 	const (
-		blue    = "\033[34m" // Blue instead of cyan
-		magenta = "\033[35m" // Magenta instead of yellow
-		cyan    = "\033[36m" // Cyan instead of green
-		reset   = "\033[0m"
+		purple = "\033[38;2;198;120;221m" // Keywords, control flow
+		blue   = "\033[38;2;97;175;239m"  // Function keywords
+		red    = "\033[38;2;224;108;117m" // Errors, important tokens
+		cyan   = "\033[38;2;86;182;194m"  // Built-in types, numbers
+		orange = "\033[38;2;209;154;102m" // Strings
+		white  = "\033[38;2;171;178;191m" // Default text, identifiers
+		gray   = "\033[38;2;92;99;112m"   // Punctuation, delimiters
+		green  = "\033[38;2;152;195;121m" // Special keywords (true/false)
+		reset  = "\033[0m"
 	)
-	return fmt.Sprintf("{%sType: %s%s%s, %sLiteral: %s%q%s}",
-		magenta, // Type: in magenta
-		cyan,    // Type value in cyan
-		t.Type,
-		reset,
-		magenta, // Literal: in magenta
-		cyan,    // Literal value in cyan
+
+	// Get color based on token type
+	var typeColor string
+	switch t.Type {
+	case ILLEGAL, EOF:
+		typeColor = red
+	case FUNCTION:
+		typeColor = blue
+	case LET, IF, ELSE, RETURN:
+		typeColor = purple
+	case TRUE, FALSE:
+		typeColor = green
+	case PLUS, MINUS, BANG, ASTERISK, SLASH, LT, GT, LTE, GTE, EQ, NEQ, ASSIGN:
+		typeColor = white
+	case INT:
+		typeColor = cyan
+	case STRING:
+		typeColor = orange
+	case COMMA, SEMICOLON, COLON, LPAREN, RPAREN, LBRACE, RBRACE, LBRACKET, RBRACKET:
+		typeColor = gray
+	case IDENTIFIER:
+		typeColor = white
+	default:
+		typeColor = white
+	}
+
+	return fmt.Sprintf("%s%q%s %s=>%s %s%s%s",
+		typeColor, // Value in dynamic color
 		t.Literal,
+		reset,
+		gray, // Arrow in gray
+		reset,
+		typeColor, // Type in same color as value
+		t.Type,
 		reset, // Reset color at the end
 	)
 }
@@ -41,31 +72,31 @@ const (
 	STRING     = "STRING"
 
 	// Operators
-	ASSIGN   = "="
-	PLUS     = "+"
-	MINUS    = "-"
-	BANG     = "!"
-	ASTERISK = "*"
-	SLASH    = "/"
+	ASSIGN   = "ASSIGN"
+	PLUS     = "PLUS"
+	MINUS    = "MINUS"
+	BANG     = "BANG"
+	ASTERISK = "ASTERISK"
+	SLASH    = "SLASH"
 
-	LT  = "<"
-	GT  = ">"
-	LTE = "<="
-	GTE = ">="
+	LT  = "LT"
+	GT  = "GT"
+	LTE = "LTE"
+	GTE = "GTE"
 
-	EQ  = "=="
-	NEQ = "!="
+	EQ  = "EQ"
+	NEQ = "NEQ"
 
 	// Delimiters
-	COMMA     = ","
-	SEMICOLON = ";"
-	COLON     = ":"
-	LPAREN    = "("
-	RPAREN    = ")"
-	LBRACE    = "{"
-	RBRACE    = "}"
-	LBRACKET  = "["
-	RBRACKET  = "]"
+	COMMA     = "COMMA"
+	SEMICOLON = "SEMICOLON"
+	COLON     = "COLON"
+	LPAREN    = "LPAREN"
+	RPAREN    = "RPAREN"
+	LBRACE    = "LBRACE"
+	RBRACE    = "RBRACE"
+	LBRACKET  = "LBRACKET"
+	RBRACKET  = "RBRACKET"
 
 	// Keywords
 	FUNCTION = "FUNCTION"
