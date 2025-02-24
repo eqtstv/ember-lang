@@ -6,12 +6,13 @@ import (
 	"ember_lang/ember_lang/object"
 	"ember_lang/ember_lang/parser"
 	"ember_lang/ember_lang/repl"
+	"ember_lang/logger"
 	"fmt"
 	"os"
 	"path/filepath"
 )
 
-var debug = os.Getenv("DEBUG") == "1"
+var debug = os.Getenv("DEBUG")
 
 func main() {
 	if len(os.Args) > 1 {
@@ -21,7 +22,7 @@ func main() {
 		// REPL mode
 		fmt.Printf("Ember Programming Language v0.0.1 (prototype)\n")
 		fmt.Printf("Type \"help\" for more information.\n")
-		repl.Start(os.Stdin, os.Stdout)
+		repl.Start(os.Stdin, os.Stdout, debug)
 	}
 }
 
@@ -39,17 +40,15 @@ func executeFile(path string) {
 		os.Exit(1)
 	}
 
-	if debug {
-		fmt.Printf("\n=== Source Code ===\n%s\n", string(code))
+	if debug == "1" {
+		logger.LogSourceCode(code)
 	}
 
 	// Lexical analysis
 	l := lexer.New(string(code))
-	if debug {
-		fmt.Println("\n=========================== Tokens ===========================")
-		for tok := l.NextToken(); tok.Type != "EOF"; tok = l.NextToken() {
-			fmt.Printf("%+v\n", tok)
-		}
+
+	if debug == "1" {
+		logger.LogTokens(l)
 		l = lexer.New(string(code)) // Reset lexer for parsing
 	}
 
@@ -62,16 +61,16 @@ func executeFile(path string) {
 		os.Exit(1)
 	}
 
-	if debug {
-		fmt.Printf("\n=========================== AST ===========================\n%s\n", program.String())
+	if debug == "1" {
+		logger.LogAST(program)
 	}
 
 	// Evaluation
 	env := object.NewEnvironment()
 	result := evaluator.Eval(program, env)
 
-	if debug {
-		fmt.Printf("\n=========================== Result ===========================\n")
+	if debug == "1" {
+		logger.LogResult(result)
 	}
 
 	if result != nil {

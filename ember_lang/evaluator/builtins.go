@@ -48,6 +48,25 @@ func init() {
 				return newArray
 			},
 		},
+		"concat": {
+			Fn: func(args ...object.Object) object.Object {
+				if len(args) != 2 {
+					return newError("Invalid number of arguments. Got: %d, Expected: 2", len(args))
+				}
+
+				array1, ok := args[0].(*object.Array)
+				if !ok {
+					return newError("Invalid argument to concat. Got: %s, Expected: ARRAY", args[0].Type())
+				}
+
+				array2, ok := args[1].(*object.Array)
+				if !ok {
+					return newError("Invalid argument to concat. Got: %s, Expected: ARRAY", args[1].Type())
+				}
+
+				return &object.Array{Elements: append(array1.Elements, array2.Elements...)}
+			},
+		},
 		"map": {
 			Fn: func(args ...object.Object) object.Object {
 				if len(args) != 2 {
