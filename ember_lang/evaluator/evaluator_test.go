@@ -730,3 +730,24 @@ func TestIncrementExpression(t *testing.T) {
 		testIntegerObject(t, evaluated, tt.expected)
 	}
 }
+
+func TestWhileExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{`
+			let i = 0;
+			while (i < 10) {
+				let i = i++;
+			}
+			return i;
+		`, 10},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+
+}

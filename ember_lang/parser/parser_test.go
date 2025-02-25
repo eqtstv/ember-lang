@@ -666,3 +666,42 @@ func TestParsingIncrementExpression(t *testing.T) {
 
 	testIncrementExpression(t, incExp.Expression, "i", "++")
 }
+
+func TestParsingWhileExpression(t *testing.T) {
+	input := "while (i < 10) { i++; }"
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain 1 statements. got=%d", len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not *ast.WhileExpression. got=%T", program.Statements[0])
+	}
+
+	we, ok := stmt.Expression.(*ast.WhileExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not *ast.WhileExpression. got=%T", stmt.Expression)
+	}
+
+	if !testInfixExpression(t, we.Condition, "i", "<", 10) {
+		return
+	}
+
+	if len(we.Body.Statements) != 1 {
+		t.Fatalf("we.Body.Statements has wrong length. got=%d", len(we.Body.Statements))
+	}
+
+	bodyStmt, ok := we.Body.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("we.Body.Statements[0] is not *ast.ExpressionStatement. got=%T", we.Body.Statements[0])
+	}
+
+	testIncrementExpression(t, bodyStmt.Expression, "i", "++")
+
+}

@@ -110,6 +110,9 @@ const (
 	IF       = "IF"
 	ELSE     = "ELSE"
 	RETURN   = "RETURN"
+
+	// Loops
+	WHILE = "WHILE"
 )
 
 var keywords = map[string]TokenType{
@@ -120,6 +123,7 @@ var keywords = map[string]TokenType{
 	"if":     IF,
 	"else":   ELSE,
 	"return": RETURN,
+	"while":  WHILE,
 }
 
 func LookupIdentifier(identifier string) TokenType {
