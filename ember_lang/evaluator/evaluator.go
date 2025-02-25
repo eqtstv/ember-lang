@@ -97,6 +97,14 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 
 		return applyFunction(function, args)
+	case *ast.IncrementExpression:
+		left := Eval(node.Left, env)
+		if isError(left) {
+			return left
+		}
+		return evalIncrementExpression(left)
+	case *ast.WhileExpression:
+		return evalWhileExpression(node, env)
 	}
 
 	return nil
@@ -403,6 +411,28 @@ func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object
 	}
 
 	return newError("Identifier not found: %s", node.Value)
+}
+
+func evalIncrementExpression(left object.Object) object.Object {
+	leftVal := left.(*object.Integer).Value
+	return &object.Integer{Value: leftVal + 1}
+}
+
+func evalWhileExpression(node *ast.WhileExpression, env *object.Environment) object.Object {
+	condition := Eval(node.Condition, env)
+	if isError(condition) {
+		return condition
+	}
+
+	for isTruthy(condition) {
+		Eval(node.Body, env)
+		condition = Eval(node.Condition, env)
+		if isError(condition) {
+			return condition
+		}
+	}
+
+	return NULL
 }
 
 func isTruthy(obj object.Object) bool {

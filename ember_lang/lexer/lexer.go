@@ -28,7 +28,13 @@ func (l *Lexer) NextToken() token.Token {
 			tok = newToken(token.ASSIGN, l.ch, l.lineNumber)
 		}
 	case '+':
-		tok = newToken(token.PLUS, l.ch, l.lineNumber)
+		if l.peekChar() == '+' {
+			ch := l.ch
+			l.readChar()
+			tok = token.Token{Type: token.INCREMENT, Literal: string(ch) + string(l.ch)}
+		} else {
+			tok = newToken(token.PLUS, l.ch, l.lineNumber)
+		}
 	case '(':
 		tok = newToken(token.LPAREN, l.ch, l.lineNumber)
 	case ')':

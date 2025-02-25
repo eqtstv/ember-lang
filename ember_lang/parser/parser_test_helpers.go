@@ -201,3 +201,21 @@ func testBooleanLiteral(t *testing.T, exp ast.Expression, value bool) bool {
 
 	return true
 }
+
+func testIncrementExpression(t *testing.T, exp ast.Expression, left any, operator string) bool {
+	incExp, ok := exp.(*ast.IncrementExpression)
+	if !ok {
+		t.Errorf("exp not *ast.IncrementExpression. got=%T", exp)
+		return false
+	}
+
+	if !testLiteralExpression(t, incExp.Left, left) {
+		return false
+	}
+
+	if incExp.Token.Literal != operator {
+		t.Errorf("incExp.Token.Literal not %s. got=%s", operator, incExp.Token.Literal)
+	}
+
+	return true
+}

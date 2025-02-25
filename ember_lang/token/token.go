@@ -80,6 +80,9 @@ const (
 	ASTERISK = "ASTERISK"
 	SLASH    = "SLASH"
 
+	// Suffix operators
+	INCREMENT = "INCREMENT"
+
 	LT  = "LT"
 	GT  = "GT"
 	LTE = "LTE"
@@ -107,6 +110,9 @@ const (
 	IF       = "IF"
 	ELSE     = "ELSE"
 	RETURN   = "RETURN"
+
+	// Loops
+	WHILE = "WHILE"
 )
 
 var keywords = map[string]TokenType{
@@ -117,6 +123,7 @@ var keywords = map[string]TokenType{
 	"if":     IF,
 	"else":   ELSE,
 	"return": RETURN,
+	"while":  WHILE,
 }
 
 func LookupIdentifier(identifier string) TokenType {

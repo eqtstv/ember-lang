@@ -3,11 +3,17 @@
 let x = 5;
 let y = 10;
 
-return x + y;
+print(x + y);
 
 let add = fn(a, b) {
     return a + b;
 };
 
-return add(x, y);
+print(add(x, y));
 
+let i = 0;
+while (i < 10) {
+    let i = i++;
+}
+
+print(i);
