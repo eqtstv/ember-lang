@@ -80,6 +80,9 @@ const (
 	ASTERISK = "ASTERISK"
 	SLASH    = "SLASH"
 
+	// Suffix operators
+	INCREMENT = "INCREMENT"
+
 	LT  = "LT"
 	GT  = "GT"
 	LTE = "LTE"

@@ -640,3 +640,29 @@ func TestParsingHashLiteralsWithExpressions(t *testing.T) {
 		testFunc(value)
 	}
 }
+
+func TestParsingIncrementExpression(t *testing.T) {
+	input := "let i = 0; i++;"
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 2 {
+		t.Fatalf("program.Statements does not contain 2 statements. got=%d", len(program.Statements))
+	}
+
+	letExp, ok := program.Statements[0].(*ast.LetStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not *ast.LetStatement. got=%T", program.Statements[0])
+	}
+
+	testLetStatement(t, letExp, "i")
+
+	incExp, ok := program.Statements[1].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[1] is not *ast.ExpressionStatement. got=%T", program.Statements[1])
+	}
+
+	testIncrementExpression(t, incExp.Expression, "i", "++")
+}
