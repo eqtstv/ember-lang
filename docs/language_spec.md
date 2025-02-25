@@ -55,6 +55,12 @@ if (<condition>) {
 }
 ```
 
+```
+while (<condition>) {
+    <body>
+}
+```
+
 ## 3. Type System
 
 Currently supported types:
