@@ -248,12 +248,6 @@ func (parser *Parser) parseForExpression() ast.Expression {
 	parser.nextToken()
 	expression.Increment = parser.parseIncrementExpression(left)
 
-	fmt.Println("expression.Increment", expression.Increment)
-	fmt.Println("expression.Condition", expression.Condition)
-	fmt.Println("expression.LetStatement", expression.LetStatement)
-	fmt.Println("curToken", parser.curToken)
-	fmt.Println("peekToken", parser.peekToken)
-
 	if !parser.expectPeek(token.LBRACE) {
 		return nil
 	}
