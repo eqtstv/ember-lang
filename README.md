@@ -27,13 +27,13 @@ let age = 25;
 let temperature = 18 + 5;
 let isHot = temperature > 20;
 
-// Loops
+// For loop
 let sum = 0;
 for (let i = 0; i < 5; i++) {
     let sum = sum + i;
 }
 
-// While loop equivalent
+// While loop
 let i = 0;
 while (i < 5) {
     let sum = sum + i;
