@@ -103,6 +103,16 @@ func printNode(node ast.Node, prefix string, isLast bool) {
 	case *ast.IndexExpression:
 		printNode(n.Left, newPrefix, false)
 		printNode(n.Index, newPrefix, true)
+	case *ast.IncrementExpression:
+		printNode(n.Left, newPrefix, true)
+	case *ast.ForExpression:
+		printNode(n.LetStatement, newPrefix, false)
+		printNode(n.Condition, newPrefix, false)
+		printNode(n.Increment, newPrefix, false)
+		printNode(n.Body, newPrefix, true)
+	case *ast.WhileExpression:
+		printNode(n.Condition, newPrefix, false)
+		printNode(n.Body, newPrefix, true)
 	}
 }
 
@@ -126,6 +136,10 @@ func getNodeInfo(node ast.Node) string {
 		return white + "Block Statement"
 	case *ast.IfExpression:
 		return purple + "If Expression"
+	case *ast.ForExpression:
+		return purple + "For Expression"
+	case *ast.WhileExpression:
+		return purple + "While Expression"
 	case *ast.Identifier:
 		return white + "Identifier: " + cyan + n.Value
 	case *ast.IntegerLiteral:
@@ -150,6 +164,8 @@ func getNodeInfo(node ast.Node) string {
 		return cyan + "Array"
 	case *ast.IndexExpression:
 		return white + "Index Expression"
+	case *ast.IncrementExpression:
+		return white + "Increment Expression"
 	default:
 		return red + fmt.Sprintf("%T", node)
 	}
