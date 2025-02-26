@@ -751,3 +751,29 @@ func TestWhileExpression(t *testing.T) {
 	}
 
 }
+
+func TestForExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{`
+			for (let i = 0; i < 10; i++) {
+				let x = i;
+			}
+			return x;
+		`, 9},
+		{`
+			for (let i = 0; i <= 10; i++) {
+				let x = i;
+			}
+			return x;
+		`, 10},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+
+}

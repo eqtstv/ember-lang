@@ -705,3 +705,51 @@ func TestParsingWhileExpression(t *testing.T) {
 	testIncrementExpression(t, bodyStmt.Expression, "i", "++")
 
 }
+
+func TestParsingForExpression(t *testing.T) {
+	input := "for (let i = 0; i < 10; i++) { 0 + i; }"
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain 1 statements. got=%d", len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not *ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	fe, ok := stmt.Expression.(*ast.ForExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not *ast.ForExpression. got=%T", stmt.Expression)
+	}
+
+	if !testLetStatement(t, fe.LetStatement, "i") {
+		return
+	}
+
+	if !testInfixExpression(t, fe.Condition, "i", "<", 10) {
+		return
+	}
+
+	if !testIncrementExpression(t, fe.Increment, "i", "++") {
+		return
+	}
+
+	if len(fe.Body.Statements) != 1 {
+		t.Fatalf("fe.Body.Statements has wrong length. got=%d", len(fe.Body.Statements))
+	}
+
+	bodyStmt, ok := fe.Body.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("fe.Body.Statements[0] is not *ast.ExpressionStatement. got=%T", fe.Body.Statements[0])
+	}
+
+	if !testInfixExpression(t, bodyStmt.Expression, 0, "+", "i") {
+		return
+	}
+}
