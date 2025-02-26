@@ -30,13 +30,13 @@ let isHot = temperature > 20;
 // For loop
 let sum = 0;
 for (let i = 0; i < 5; i++) {
-    let sum = sum + i;
+    print(i);
 }
 
 // While loop
 let i = 0;
 while (i < 5) {
-    let sum = sum + i;
+    print(i);
     let i = i++;
 }
 
