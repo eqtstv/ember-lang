@@ -90,6 +90,7 @@ func New(lexer *lexer.Lexer) *Parser {
 	parser.registerPrefix(token.LBRACKET, parser.parseArrayLiteral)
 	parser.registerPrefix(token.LBRACE, parser.parseHashLiteral)
 	parser.registerPrefix(token.WHILE, parser.parseWhileExpression)
+	parser.registerPrefix(token.FOR, parser.parseForExpression)
 
 	// Infix parse functions
 	parser.infixParseFns = make(map[token.TokenType]InfixParseFn)
@@ -217,6 +218,63 @@ func (parser *Parser) parseWhileExpression() ast.Expression {
 
 	return expression
 
+}
+
+func (parser *Parser) parseForExpression() ast.Expression {
+	expression := &ast.ForExpression{Token: parser.curToken}
+
+	if !parser.expectPeek(token.LPAREN) {
+		return nil
+	}
+
+	parser.nextToken()
+	expression.LetStatement = parser.parseForLoopLetStatement()
+
+	if !parser.expectPeek(token.SEMICOLON) {
+		return nil
+	}
+
+	parser.nextToken()
+
+	expression.Condition = parser.parseExpression(LOWEST)
+
+	if !parser.expectPeek(token.SEMICOLON) {
+		return nil
+	}
+
+	parser.nextToken()
+
+	left := parser.parseIdentifier()
+	parser.nextToken()
+	expression.Increment = parser.parseIncrementExpression(left)
+
+	if !parser.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	expression.Body = parser.parseBlockStatement()
+
+	return expression
+}
+
+func (parser *Parser) parseForLoopLetStatement() *ast.LetStatement {
+	letStmt := &ast.LetStatement{Token: parser.curToken}
+
+	if !parser.expectPeek(token.IDENTIFIER) {
+		return nil
+	}
+
+	letStmt.Name = &ast.Identifier{Token: parser.curToken, Value: parser.curToken.Literal}
+
+	if !parser.expectPeek(token.ASSIGN) {
+		return nil
+	}
+
+	parser.nextToken()
+
+	letStmt.Value = parser.parseExpression(LOWEST)
+
+	return letStmt
 }
 
 func (parser *Parser) parseFunctionLiteral() ast.Expression {

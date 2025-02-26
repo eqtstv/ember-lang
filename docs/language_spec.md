@@ -47,6 +47,10 @@ let makeAdder = fn(x) {
 
 ### 2.3 Control Flow
 
+#### If Statements
+
+The language supports standard control flow if statements:
+
 ```
 if (<condition>) {
     <consequence>
@@ -55,9 +59,32 @@ if (<condition>) {
 }
 ```
 
+#### Loops
+
+Two types of loops are supported:
+
 ```
 while (<condition>) {
     <body>
+}
+
+for (let <var> = <init>; <condition>; <increment>) {
+    <body>
+}
+```
+
+Example:
+
+```typescript
+// While loop with increment
+let i = 0;
+while (i < 5) {
+  let i = i++;
+}
+
+// Equivalent for loop
+for (let i = 0; i < 5; i++) {
+  // loop body
 }
 ```
 

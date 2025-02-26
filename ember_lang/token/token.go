@@ -34,7 +34,7 @@ func (t Token) String() string {
 		typeColor = red
 	case FUNCTION:
 		typeColor = blue
-	case LET, IF, ELSE, RETURN:
+	case LET, IF, ELSE, RETURN, WHILE, FOR:
 		typeColor = purple
 	case TRUE, FALSE:
 		typeColor = green
@@ -92,15 +92,15 @@ const (
 	NEQ = "NEQ"
 
 	// Delimiters
-	COMMA     = "COMMA"
-	SEMICOLON = "SEMICOLON"
-	COLON     = "COLON"
-	LPAREN    = "LPAREN"
-	RPAREN    = "RPAREN"
-	LBRACE    = "LBRACE"
-	RBRACE    = "RBRACE"
-	LBRACKET  = "LBRACKET"
-	RBRACKET  = "RBRACKET"
+	COMMA     = "COMMA"     // ,
+	SEMICOLON = "SEMICOLON" // ;
+	COLON     = "COLON"     // :
+	LPAREN    = "LPAREN"    // (
+	RPAREN    = "RPAREN"    // )
+	LBRACE    = "LBRACE"    // {
+	RBRACE    = "RBRACE"    // }
+	LBRACKET  = "LBRACKET"  // [
+	RBRACKET  = "RBRACKET"  // ]
 
 	// Keywords
 	FUNCTION = "FUNCTION"
@@ -113,6 +113,7 @@ const (
 
 	// Loops
 	WHILE = "WHILE"
+	FOR   = "FOR"
 )
 
 var keywords = map[string]TokenType{
@@ -124,6 +125,7 @@ var keywords = map[string]TokenType{
 	"else":   ELSE,
 	"return": RETURN,
 	"while":  WHILE,
+	"for":    FOR,
 }
 
 func LookupIdentifier(identifier string) TokenType {

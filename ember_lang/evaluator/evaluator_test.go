@@ -751,3 +751,46 @@ func TestWhileExpression(t *testing.T) {
 	}
 
 }
+
+func TestForExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{`
+			for (let i = 0; i < 10; i++) {
+				let x = i;
+			}
+			return x;
+		`, 9},
+		{`
+			for (let i = 0; i <= 10; i++) {
+				let x = i;
+			}
+			return x;
+		`, 10},
+		// Nested loops
+		{`
+			let sum = 0;
+			for (let i = 0; i < 3; i++) {
+				for (let j = 0; j < 2; j++) {
+					let sum = sum + 1;
+				}
+			}
+			return sum;
+		`, 6},
+		// Empty loop (no iterations)
+		{`
+			let x = 5;
+			for (let i = 0; i < 0; i++) {
+				let x = 10;
+			}
+			return x;
+		`, 5},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}

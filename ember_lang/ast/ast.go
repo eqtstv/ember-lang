@@ -461,7 +461,6 @@ func (ie *IncrementExpression) String() string {
 
 	out.WriteString(ie.TokenLiteral())
 	out.WriteString(ie.Left.String())
-	out.WriteString("++")
 
 	return out.String()
 }
@@ -487,6 +486,38 @@ func (we *WhileExpression) String() string {
 	out.WriteString(we.Condition.String())
 	out.WriteString(" {")
 	out.WriteString(we.Body.String())
+	out.WriteString("}")
+
+	return out.String()
+}
+
+// ------------------------------------- ForExpression -------------------------------------
+
+type ForExpression struct {
+	Token        token.Token // token.FOR token
+	LetStatement *LetStatement
+	Condition    Expression
+	Increment    Expression
+	Body         *BlockStatement
+}
+
+func (fe *ForExpression) expressionNode() {}
+
+func (fe *ForExpression) TokenLiteral() string {
+	return fe.Token.Literal
+}
+
+func (fe *ForExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(fe.TokenLiteral() + " ")
+	out.WriteString(fe.LetStatement.String())
+	out.WriteString("; ")
+	out.WriteString(fe.Condition.String())
+	out.WriteString("; ")
+	out.WriteString(fe.Increment.String())
+	out.WriteString(" {")
+	out.WriteString(fe.Body.String())
 	out.WriteString("}")
 
 	return out.String()
