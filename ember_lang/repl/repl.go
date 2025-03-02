@@ -1,9 +1,12 @@
 package repl
 
 import (
-	"bufio"
 	"fmt"
 	"io"
+	"os"
+	"strings"
+
+	"github.com/chzyer/readline"
 
 	"ember_lang/ember_lang/evaluator"
 	"ember_lang/ember_lang/lexer"
@@ -47,20 +50,32 @@ Type 'help' for this message, 'exit' or 'quit' to exit.
 )
 
 func Start(in io.Reader, out io.Writer, debug string) {
-	scanner := bufio.NewScanner(in)
 	env := object.NewEnvironment()
+
+	readline, err := readline.NewEx(&readline.Config{
+		Prompt:          PROMPT,
+		HistoryFile:     os.Getenv("HOME") + "/.ember_history",
+		InterruptPrompt: "^C",
+		EOFPrompt:       "exit",
+	})
+	if err != nil {
+		panic(err)
+	}
+	defer readline.Close()
 
 	fmt.Fprintf(out, "Ember Programming Language v0.0.1 (prototype)\n")
 	fmt.Fprintf(out, "Type \"help\" for more information.\n")
 
 	for {
-		fmt.Fprint(out, PROMPT)
-		scanned := scanner.Scan()
-		if !scanned {
-			return
+		line, err := readline.Readline()
+		if err != nil {
+			break
 		}
 
-		line := scanner.Text()
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
 
 		switch line {
 		case "help":
