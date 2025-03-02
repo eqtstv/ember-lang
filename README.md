@@ -28,7 +28,6 @@ let temperature = 18 + 5;
 let isHot = temperature > 20;
 
 // For loop
-let sum = 0;
 for (let i = 0; i < 5; i++) {
     print(i);
 }
@@ -42,9 +41,9 @@ while (i < 5) {
 
 // Arrays
 let numbers = [1, 2, 3, 4, 5];
-let doubled = numbers.map(fn(x) { x * 2 });  // [2, 4, 6, 8, 10]
-let sum = numbers.reduce(fn(acc, x) { acc + x }, 0);  // 15
-numbers.push(6);  // [1, 2, 3, 4, 5, 6]
+let doubled = map(numbers, fn(x) { x * 2 });  // [2, 4, 6, 8, 10]
+let sum = reduce(numbers, add, 0);  // 15
+let numbers = push(numbers, 6);  // [1, 2, 3, 4, 5, 6]
 
 // Hashes
 let person = {
@@ -53,7 +52,6 @@ let person = {
     "city": "New York"
 };
 let name = person["name"];  // "John"
-person["country"] = "USA";  // Add new key-value pair
 
 // Functions
 let greet = fn(name) {
@@ -69,13 +67,6 @@ let max = fn(a, b) {
         return b;
     }
 };
-
-// Loops and increment
-let i = 0;
-while (i < 5) {
-    let i = i++;
-}
-print(i);  // 5;
 
 // Functions and closures
 let makeAdder = fn(x) {
