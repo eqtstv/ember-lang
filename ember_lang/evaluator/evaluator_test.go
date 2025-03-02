@@ -794,3 +794,26 @@ func TestForExpression(t *testing.T) {
 		testIntegerObject(t, evaluated, tt.expected)
 	}
 }
+
+func TestBuiltinTypeFunction(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`type(1)`, "INTEGER"},
+		{`type("hello")`, "STRING"},
+		{`type(true)`, "BOOLEAN"},
+		{`type([1, 2, 3])`, "ARRAY"},
+		{`type({"a": 1, "b": 2})`, "HASH"},
+		{`type(fn(x) { x + 1; })`, "FUNCTION"},
+		{`type(1 + 2)`, "INTEGER"},
+		{`type("hello" + " world")`, "STRING"},
+		{`type([1, 2, 3] + [4, 5, 6])`, "ARRAY"},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testStringObject(t, evaluated, tt.expected)
+	}
+
+}

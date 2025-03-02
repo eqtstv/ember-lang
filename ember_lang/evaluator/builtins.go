@@ -231,5 +231,29 @@ func init() {
 				return &object.Integer{Value: left.Value / right.Value}
 			},
 		},
+		"type": {
+			Fn: func(args ...object.Object) object.Object {
+				if len(args) != 1 {
+					return newError("Invalid number of arguments. Got: %d, Expected: 1", len(args))
+				}
+
+				switch args[0].(type) {
+				case *object.Integer:
+					return &object.String{Value: "INTEGER"}
+				case *object.String:
+					return &object.String{Value: "STRING"}
+				case *object.Boolean:
+					return &object.String{Value: "BOOLEAN"}
+				case *object.Array:
+					return &object.String{Value: "ARRAY"}
+				case *object.Hash:
+					return &object.String{Value: "HASH"}
+				case *object.Function:
+					return &object.String{Value: "FUNCTION"}
+				default:
+					return newError("Invalid argument to type. Got: %s", args[0].Type())
+				}
+			},
+		},
 	}
 }
