@@ -20,8 +20,6 @@ func main() {
 		executeFile(os.Args[1])
 	} else {
 		// REPL mode
-		fmt.Printf("Ember Programming Language v0.0.1 (prototype)\n")
-		fmt.Printf("Type \"help\" for more information.\n")
 		repl.Start(os.Stdin, os.Stdout, debug)
 	}
 }

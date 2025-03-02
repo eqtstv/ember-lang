@@ -12,24 +12,63 @@ import (
 )
 
 const (
-	CYAN   = "\033[1;96m"
-	RESET  = "\033[0m"
-	PROMPT = CYAN + "⟶ " + RESET
+	CYAN      = "\033[1;96m"
+	RESET     = "\033[0m"
+	PROMPT    = CYAN + "⟶ " + RESET
+	HELP_TEXT = `
+Ember Programming Language REPL
+=============================
+
+Commands:
+  help              Show this help message
+  exit, quit        Exit the REPL
+
+Basic Syntax:
+------------
+  let x = 5;                      // Variable declaration
+  let addOne = fn(x) { x + 1 };   // Function definition
+  if (x > 0) { ... }              // Conditional statement
+  while (x < 5) { ... }           // While loop
+  for (let i = 0; i < 5; i++) {   // For loop
+    ...
+  }
+  [1, 2, 3]                       // Array literal
+  {"a": 1, "b": 2}                // Hash/map literal
+
+Built-in Functions:
+-----------------
+  print(value)      Print value to console
+  len(array)        Get length of array or string
+  type(value)       Get type of value
+  push(arr, item)   Append item to array
+
+Type 'help' for this message, 'exit' or 'quit' to exit.
+`
 )
 
 func Start(in io.Reader, out io.Writer, debug string) {
 	scanner := bufio.NewScanner(in)
 	env := object.NewEnvironment()
 
+	fmt.Fprintf(out, "Ember Programming Language v0.0.1 (prototype)\n")
+	fmt.Fprintf(out, "Type \"help\" for more information.\n")
+
 	for {
 		fmt.Fprint(out, PROMPT)
 		scanned := scanner.Scan()
-
 		if !scanned {
 			return
 		}
 
 		line := scanner.Text()
+
+		switch line {
+		case "help":
+			fmt.Fprint(out, HELP_TEXT)
+			continue
+		case "exit", "quit":
+			return
+		}
 
 		if debug == "1" {
 			fmt.Printf("\n========================= Source Code =========================\n%s\n", line)
