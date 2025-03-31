@@ -471,46 +471,61 @@ func evalForExpression(node *ast.ForExpression, env *object.Environment) object.
 }
 
 func evalAssignmentExpression(node *ast.AssignmentExpression, env *object.Environment) object.Object {
+	// Assignment to a variable
 	if identifier, ok := node.Left.(*ast.Identifier); ok {
+		// Check if the variable is mutable
 		if !env.IsMutable(identifier.Value) {
 			return newError("(line %d) Cannot assign to immutable variable: %s", identifier.Token.LineNumber, identifier.Value)
 		}
 
+		// Evaluate the right-hand side of the assignment
 		right := Eval(node.Right, env)
 		if isError(right) {
 			return right
 		}
 
+		// Set the value of the variable
 		env.Set(identifier.Value, right, true)
+
+		// Return the value of the assignment
 		return right
 	}
 
+	// Assignment to an Index Expression
+	// eg. arr[0] = 1, map[key] = value
 	if indexExpression, ok := node.Left.(*ast.IndexExpression); ok {
-		left := Eval(indexExpression.Left, env)
-		if isError(left) {
-			return left
-		}
-
+		// Check if the variable is mutable
 		identifier := indexExpression.Left.(*ast.Identifier)
 		if !env.IsMutable(identifier.Value) {
 			return newError("(line %d) Cannot assign to immutable variable: %s", identifier.Token.LineNumber, identifier.Value)
 		}
 
+		// Evaluate the left-hand side of the assignment
+		left := Eval(indexExpression.Left, env)
+		if isError(left) {
+			return left
+		}
+
+		// Evaluate the index of the assignment
 		index := Eval(indexExpression.Index, env)
 		if isError(index) {
 			return index
 		}
 
+		// Evaluate the right-hand side of the assignment
 		right := Eval(node.Right, env)
 		if isError(right) {
 			return right
 		}
 
+		// Assign the value to the index of the array or map
 		switch left := left.(type) {
+		// Array Assignment
 		case *object.Array:
 			indexValue := index.(*object.Integer).Value
 			left.Elements[indexValue] = right
 			return right
+		// Map Assignment
 		case *object.Hash:
 			key, ok := index.(object.Hashable)
 			if !ok {
