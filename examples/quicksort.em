@@ -34,6 +34,6 @@ let quicksort = fn(arr, low, high) {
 
 let array = [10, 7, 8, 9, 1, 5, 3, 2, 6, 4];
 
-print(array);
+print("Original array:", array);
 quicksort(array, 0, len(array) - 1);
-print(array);
+print("Sorted array:", array);
