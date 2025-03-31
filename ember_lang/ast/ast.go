@@ -26,8 +26,9 @@ type Expression interface {
 // ------------------------------------- Identifier -------------------------------------
 
 type Identifier struct {
-	Token token.Token // token.IDENTIFIER token
-	Value string
+	Token   token.Token // token.IDENTIFIER token
+	Value   string
+	Mutable bool
 }
 
 func (i *Identifier) expressionNode() {}

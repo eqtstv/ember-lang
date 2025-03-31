@@ -13,13 +13,13 @@ const (
 	LOWEST
 	EQUALS      // ==
 	LESSGREATER // > or <
+	ASSIGN      // =
 	SUM         // +
 	PRODUCT     // *
 	PREFIX      // -X or !X
 	CALL        // myFunction(X)
 	INCREMENT   // i++
 	INDEX       // array[index]
-	ASSIGN      // =
 )
 
 var precedences = map[token.TokenType]int{
@@ -505,14 +505,21 @@ func (parser *Parser) parseStatement() ast.Statement {
 
 func (parser *Parser) parseLetStatement() *ast.LetStatement {
 	statement := &ast.LetStatement{Token: parser.curToken}
+	mutable := false
+
+	if parser.peekTokenIs(token.MUT) {
+		mutable = true
+		parser.nextToken()
+	}
 
 	if !parser.expectPeek(token.IDENTIFIER) {
 		return nil
 	}
 
 	statement.Name = &ast.Identifier{
-		Token: parser.curToken,
-		Value: parser.curToken.Literal,
+		Token:   parser.curToken,
+		Value:   parser.curToken.Literal,
+		Mutable: mutable,
 	}
 
 	if !parser.expectPeek(token.ASSIGN) {

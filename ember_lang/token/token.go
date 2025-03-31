@@ -114,6 +114,9 @@ const (
 	// Loops
 	WHILE = "WHILE"
 	FOR   = "FOR"
+
+	// Mutable
+	MUT = "MUT"
 )
 
 var keywords = map[string]TokenType{
@@ -126,6 +129,7 @@ var keywords = map[string]TokenType{
 	"return": RETURN,
 	"while":  WHILE,
 	"for":    FOR,
+	"mut":    MUT,
 }
 
 func LookupIdentifier(identifier string) TokenType {

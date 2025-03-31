@@ -9,9 +9,9 @@ let add = fn(a, b) {
 };
 print(add(x, y));
 
-let i = 0;
+let mut i = 0;
 while (i < 10) {
-    let i = i++;
+    i = i++;
 }
 print(i);
 

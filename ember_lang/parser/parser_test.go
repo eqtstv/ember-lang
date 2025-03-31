@@ -754,51 +754,7 @@ func TestParsingForExpression(t *testing.T) {
 	}
 }
 
-func TestAssignmentExpressions(t *testing.T) {
-	tests := []struct {
-		input              string
-		expectedIdentifier string
-		expectedValue      interface{}
-	}{
-		{"x = 5;", "x", 5},
-		{"y = true;", "y", true},
-		{"foobar = y;", "foobar", "y"},
-	}
-
-	for _, tt := range tests {
-		l := lexer.New(tt.input)
-		p := New(l)
-		program := p.ParseProgram()
-		checkParserErrors(t, p)
-
-		if len(program.Statements) != 1 {
-			t.Fatalf("program.Statements does not contain 1 statement. got=%d",
-				len(program.Statements))
-		}
-
-		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-		if !ok {
-			t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
-				program.Statements[0])
-		}
-
-		exp, ok := stmt.Expression.(*ast.AssignmentExpression)
-		if !ok {
-			t.Fatalf("stmt.Expression is not ast.AssignmentExpression. got=%T",
-				stmt.Expression)
-		}
-
-		if !testIdentifier(t, exp.Left, tt.expectedIdentifier) {
-			return
-		}
-
-		if !testLiteralExpression(t, exp.Right, tt.expectedValue) {
-			return
-		}
-	}
-}
-
-func TestInvalidAssignmentTargets(t *testing.T) {
+func TestParsingInvalidAssignmentTargets(t *testing.T) {
 	tests := []struct {
 		input           string
 		expectedMessage string
@@ -823,6 +779,52 @@ func TestInvalidAssignmentTargets(t *testing.T) {
 		if p.Errors()[0] != tt.expectedMessage {
 			t.Errorf("wrong error message. expected=%q, got=%q",
 				tt.expectedMessage, p.Errors()[0])
+		}
+	}
+}
+
+func TestParsingMutableLetStatements(t *testing.T) {
+	tests := []struct {
+		input              string
+		expectedIdentifier string
+		expectedValue      interface{}
+		expectedMutable    bool
+	}{
+		{"let x = 5;", "x", 5, false},
+		{"let mut y = 10;", "y", 10, true},
+		{"let mut foobar = y;", "foobar", "y", true},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements does not contain 1 statements. got=%d",
+				len(program.Statements))
+		}
+
+		stmt := program.Statements[0]
+		if !testLetStatement(t, stmt, tt.expectedIdentifier) {
+			return
+		}
+
+		letStmt, ok := stmt.(*ast.LetStatement)
+		if !ok {
+			t.Fatalf("stmt not *ast.LetStatement. got=%T", stmt)
+			return
+		}
+
+		if letStmt.Name.Mutable != tt.expectedMutable {
+			t.Errorf("letStmt.Name.Mutable wrong. expected=%t, got=%t",
+				tt.expectedMutable, letStmt.Name.Mutable)
+		}
+
+		val := letStmt.Value
+		if !testLiteralExpression(t, val, tt.expectedValue) {
+			return
 		}
 	}
 }

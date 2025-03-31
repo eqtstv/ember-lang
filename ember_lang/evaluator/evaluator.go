@@ -32,7 +32,10 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		if isError(val) {
 			return val
 		}
-		env.Set(node.Name.Value, val)
+		_, ok := env.Set(node.Name.Value, val, node.Name.Mutable)
+		if !ok {
+			return newError("(line %d) Cannot assign to immutable variable: %s", node.Token.LineNumber, node.Name.Value)
+		}
 		return val
 
 	// Expressions
@@ -178,7 +181,10 @@ func extendFunctionEnv(fn *object.Function, args []object.Object) *object.Enviro
 	env := object.NewEnclosedEnvironment(fn.Env)
 
 	for paramIdx, param := range fn.Parameters {
-		env.Set(param.Value, args[paramIdx])
+		_, ok := env.Set(param.Value, args[paramIdx], param.Mutable)
+		if !ok {
+			panic(newError("(line %d) Cannot assign to immutable variable: %s", param.Token.LineNumber, param.Value))
+		}
 	}
 	return env
 }
@@ -428,7 +434,11 @@ func evalWhileExpression(node *ast.WhileExpression, env *object.Environment) obj
 	}
 
 	for isTruthy(condition) {
-		Eval(node.Body, env)
+		result := Eval(node.Body, env)
+		if isError(result) {
+			return result
+		}
+
 		condition = Eval(node.Condition, env)
 		if isError(condition) {
 			return condition
@@ -442,7 +452,11 @@ func evalForExpression(node *ast.ForExpression, env *object.Environment) object.
 	letStatement := node.LetStatement
 
 	// Set the initial value of the loop variable
-	env.Set(letStatement.Name.Value, Eval(letStatement.Value, env))
+	_, ok := env.Set(letStatement.Name.Value, Eval(letStatement.Value, env), true)
+
+	if !ok {
+		return newError("(line %d) Cannot assign to immutable variable: %s", letStatement.Token.LineNumber, letStatement.Name.Value)
+	}
 
 	for {
 		condition := Eval(node.Condition, env)
@@ -460,26 +474,31 @@ func evalForExpression(node *ast.ForExpression, env *object.Environment) object.
 			return increment
 		}
 
-		env.Set(letStatement.Name.Value, increment)
+		_, ok = env.Set(letStatement.Name.Value, increment, true)
+		if !ok {
+			return newError("(line %d) Cannot assign to immutable variable: %s", letStatement.Token.LineNumber, letStatement.Name.Value)
+		}
 	}
 
 	return NULL
 }
 
 func evalAssignmentExpression(node *ast.AssignmentExpression, env *object.Environment) object.Object {
-	left := Eval(node.Left, env)
-	if isError(left) {
-		return left
-	}
-
-	right := Eval(node.Right, env)
-	if isError(right) {
-		return right
-	}
-
 	if identifier, ok := node.Left.(*ast.Identifier); ok {
-		env.Set(identifier.Value, right)
-		return NULL
+		if !env.IsMutable(identifier.Value) {
+			return newError("(line %d) Cannot assign to immutable variable: %s", identifier.Token.LineNumber, identifier.Value)
+		}
+
+		right := Eval(node.Right, env)
+		if isError(right) {
+			return right
+		}
+
+		_, ok := env.Set(identifier.Value, right, true)
+		if !ok {
+			return newError("(line %d) Cannot assign to immutable variable: %s", identifier.Token.LineNumber, identifier.Value)
+		}
+		return right
 	}
 
 	return newError("invalid assignment target")
