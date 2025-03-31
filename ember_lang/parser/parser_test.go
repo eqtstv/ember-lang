@@ -797,3 +797,32 @@ func TestAssignmentExpressions(t *testing.T) {
 		}
 	}
 }
+
+func TestInvalidAssignmentTargets(t *testing.T) {
+	tests := []struct {
+		input           string
+		expectedMessage string
+	}{
+		{"5 = 10;", "(line 1) invalid assignment target"},
+		{"true = false;", "(line 1) invalid assignment target"},
+		{"\"hello\" = \"world\";", "(line 1) invalid assignment target"},
+		{"(x + y) = 10;", "(line 1) invalid assignment target"},
+		{"fn(x) { x } = 10;", "(line 1) invalid assignment target"},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		p.ParseProgram()
+
+		if len(p.Errors()) == 0 {
+			t.Errorf("parser.ParseProgram() didn't return any errors for invalid input: %s", tt.input)
+			continue
+		}
+
+		if p.Errors()[0] != tt.expectedMessage {
+			t.Errorf("wrong error message. expected=%q, got=%q",
+				tt.expectedMessage, p.Errors()[0])
+		}
+	}
+}
