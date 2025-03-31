@@ -1032,3 +1032,83 @@ func TestAssignmentInComplexExpressions(t *testing.T) {
 		testIntegerObject(t, evaluated, tt.expected)
 	}
 }
+
+func TestEvalQuickSortAlgorithm(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []int64
+	}{
+		{`
+		let partition = fn(arr, low, high) {
+			let mut arr = arr;
+			let pivot = arr[high];
+			
+			let mut i = low - 1;
+			
+			for (let j = low; j < high; j++) {
+				if (arr[j] < pivot) {
+					i = i + 1;
+					
+					let temp = arr[i];
+					arr[i] = arr[j];
+					arr[j] = temp;
+				}
+			}
+			
+			let temp = arr[i + 1];
+			arr[i + 1] = arr[high];
+			arr[high] = temp;
+			
+			return i + 1;
+		};
+
+		let quicksort = fn(arr, low, high) {
+			if (low < high) {
+				let pi = partition(arr, low, high);
+				
+				quicksort(arr, low, pi - 1);
+				quicksort(arr, pi + 1, high);
+			}
+			
+			return arr;
+		};
+
+		let array = [10, 7, 8, 9, 1, 5, 3, 2, 6, 4];
+		let sorted = quicksort(array, 0, len(array) - 1);
+
+		return sorted;
+		`, []int64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		if evaluated == nil {
+			t.Errorf("Expected evaluated to be non-nil for input: %s", tt.input)
+			continue
+		}
+
+		if array, ok := evaluated.(*object.Array); ok {
+			if len(array.Elements) != len(tt.expected) {
+				t.Errorf("Expected array length %d, got %d", len(tt.expected), len(array.Elements))
+				continue
+			}
+
+			for i, element := range array.Elements {
+				if element == nil {
+					t.Errorf("Expected element %d to be non-nil", i)
+					continue
+				}
+
+				if intObj, ok := element.(*object.Integer); ok {
+					if intObj.Value != tt.expected[i] {
+						t.Errorf("Expected element %d to be %d, got %d", i, tt.expected[i], intObj.Value)
+					}
+				} else {
+					t.Errorf("Expected element %d to be an integer, got %T", i, element)
+				}
+			}
+		} else {
+			t.Errorf("Expected evaluated to be an array, got %T", evaluated)
+		}
+	}
+}
