@@ -468,6 +468,10 @@ func (parser *Parser) nextToken() {
 	parser.peekToken = parser.lexer.NextToken()
 
 	// Skip comment tokens
+	if parser.curToken.Type == token.COMMENT {
+		parser.curToken = parser.peekToken
+		parser.peekToken = parser.lexer.NextToken()
+	}
 	if parser.peekToken.Type == token.COMMENT {
 		parser.peekToken = parser.lexer.NextToken()
 	}

@@ -17,6 +17,7 @@ Ember is an interpreted programming language implemented in Go, designed to be s
 - Return statements
 - Operator precedence parsing
 - REPL with error reporting
+- Comments using `//`
 
 ## Language Syntax
 
@@ -37,15 +38,16 @@ y = 10;            // Works fine
 
 // For loop
 for (let i = 0; i < 5; i++) {
-    print(i);
+    let forIndex = i;
 }
+print(forIndex);
 
 // While loop
 let mut i = 0;
 while (i < 5) {
-    print(i);
     i = i + 1;
 }
+print(i);
 
 // Arrays
 let numbers = [1, 2, 3, 4, 5];
@@ -60,12 +62,14 @@ let person = {
     "city": "New York"
 };
 let name = person["name"];  // "John"
+print(name);
 
 // Functions
 let greet = fn(name) {
     return "Hello, " + name + "!";
 };
-greet("John");  // Returns "Hello, John!"
+let greeting = greet("John");  // Returns "Hello, John!"
+print(greeting);
 
 // Conditionals
 let max = fn(a, b) {
@@ -84,8 +88,10 @@ let makeAdder = fn(x) {
 };
 
 let addFive = makeAdder(5);
-addFive(10);   // Returns 15
-addFive(20);   // Returns 25
+let mut result = addFive(10);   // Returns 15
+print(result);
+result = addFive(20);   // Returns 25
+print(result);
 
 // Recursive functions
 let fib = fn(n) {
@@ -95,7 +101,8 @@ let fib = fn(n) {
     return fib(n - 1) + fib(n - 2);
 };
 
-let result = fib(10);  // Calculate 10th Fibonacci number
+let mut result = fib(10);  // Calculate 10th Fibonacci number
+print(result); // 55
 ```
 
 ## Mutability
