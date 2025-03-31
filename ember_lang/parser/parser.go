@@ -466,6 +466,11 @@ func (p *Parser) expectPeek(t token.TokenType) bool {
 func (parser *Parser) nextToken() {
 	parser.curToken = parser.peekToken
 	parser.peekToken = parser.lexer.NextToken()
+
+	// Skip comment tokens
+	if parser.peekToken.Type == token.COMMENT {
+		parser.peekToken = parser.lexer.NextToken()
+	}
 }
 
 func (parser *Parser) registerPrefix(tokenType token.TokenType, fn PrefixParseFn) {

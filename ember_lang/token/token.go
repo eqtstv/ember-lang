@@ -117,6 +117,9 @@ const (
 
 	// Mutable
 	MUT = "MUT"
+
+	// Special
+	COMMENT = "COMMENT"
 )
 
 var keywords = map[string]TokenType{

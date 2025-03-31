@@ -368,3 +368,7 @@ The tree depth indicates:
 2. Expression composition
 3. Operator precedence
 4. Control flow structure
+
+## Comments
+
+Ember supports single-line comments using the `//` syntax. Everything after `//` until the end of the line is considered a comment and is ignored by the interpreter.
