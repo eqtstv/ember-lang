@@ -501,7 +501,45 @@ func evalAssignmentExpression(node *ast.AssignmentExpression, env *object.Enviro
 		return right
 	}
 
-	return newError("invalid assignment target")
+	if indexExpression, ok := node.Left.(*ast.IndexExpression); ok {
+		left := Eval(indexExpression.Left, env)
+		if isError(left) {
+			return left
+		}
+
+		identifier := indexExpression.Left.(*ast.Identifier)
+		if !env.IsMutable(identifier.Value) {
+			return newError("(line %d) Cannot assign to immutable variable: %s", identifier.Token.LineNumber, identifier.Value)
+		}
+
+		index := Eval(indexExpression.Index, env)
+		if isError(index) {
+			return index
+		}
+
+		right := Eval(node.Right, env)
+		if isError(right) {
+			return right
+		}
+
+		switch left := left.(type) {
+		case *object.Array:
+			indexValue := index.(*object.Integer).Value
+			left.Elements[indexValue] = right
+			return right
+		case *object.Hash:
+			key, ok := index.(object.Hashable)
+			if !ok {
+				return newError("(line %d) invalid assignment target", node.Token.LineNumber)
+			}
+			left.Pairs[key.HashKey()] = object.HashPair{Key: index, Value: right}
+			return right
+		}
+
+		return newError("(line %d) invalid assignment target", node.Token.LineNumber)
+	}
+
+	return newError("(line %d) invalid assignment target", node.Token.LineNumber)
 }
 
 func isTruthy(obj object.Object) bool {

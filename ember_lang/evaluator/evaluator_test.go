@@ -884,6 +884,26 @@ func TestMutabilityInAssignments(t *testing.T) {
 		// {"let mut x = 5; let y = 10; if (true) { let x = 20; }; return x;", 5, false, ""},
 		// // Trying to assign to a shadowed variable
 		// {"let x = 5; if (true) { let mut x = 10; x = 20; }; return x;", 5, false, ""},
+		// Mutability in arrays
+		{`
+			let numbers = [1, 2, 3];
+			numbers[0] = 10;
+		`, nil, true, "(line 3) Cannot assign to immutable variable: numbers"},
+		{`
+			let mut numbers = [1, 2, 3];
+			numbers[0] = 10;
+			return numbers[0];
+		`, 10, false, ""},
+		{`
+			let mapping = {"a": 1, "b": 2, "c": 3};
+			mapping["a"] = 10;
+			return mapping["a"];
+		`, nil, true, "(line 3) Cannot assign to immutable variable: mapping"},
+		{`
+			let mut mapping = {"a": 1, "b": 2, "c": 3};
+			mapping["a"] = 10;
+			return mapping["a"];
+		`, 10, false, ""},
 	}
 
 	for _, tt := range tests {

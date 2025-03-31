@@ -612,7 +612,10 @@ func (parser *Parser) parseBlockStatement() *ast.BlockStatement {
 func (parser *Parser) parseAssignmentExpression(left ast.Expression) ast.Expression {
 	// Check if the left side is a valid assignment target
 	if _, ok := left.(*ast.Identifier); !ok {
-		parser.errors = append(parser.errors, fmt.Sprintf("(line %d) invalid assignment target", parser.curToken.LineNumber))
+		// Also allow index expressions (array[index] or map[key])
+		if _, ok := left.(*ast.IndexExpression); !ok {
+			parser.errors = append(parser.errors, fmt.Sprintf("(line %d) invalid assignment target", parser.curToken.LineNumber))
+		}
 	}
 
 	expression := &ast.AssignmentExpression{

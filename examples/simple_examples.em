@@ -21,3 +21,11 @@ for (let i = 0; i < 10; i++) {
 }
 print(x);
 
+
+let mut numbers = [1, 2, 3];
+numbers[0] = 10;
+print(numbers);
+
+let mut mapping = {"a": 1, "b": 2, "c": 3};
+mapping["a"] = 10;
+print(mapping);
