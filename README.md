@@ -13,6 +13,7 @@ Ember is an interpreted programming language implemented in Go, designed to be s
 - Array operations (`map`, `reduce`, `push`)
 - Built-in functions for common operations
 - Variables with `let` keyword
+- Immutability by default with explicit `mut` keyword for mutability
 - Return statements
 - Operator precedence parsing
 - REPL with error reporting
@@ -27,16 +28,23 @@ let age = 25;
 let temperature = 18 + 5;
 let isHot = temperature > 20;
 
+// Mutability
+let x = 5;         // Immutable by default
+// x = 10;         // Error: Cannot assign to immutable variable: x
+
+let mut y = 5;     // Explicitly mutable
+y = 10;            // Works fine
+
 // For loop
 for (let i = 0; i < 5; i++) {
     print(i);
 }
 
 // While loop
-let i = 0;
+let mut i = 0;
 while (i < 5) {
     print(i);
-    let i = i++;
+    i = i + 1;
 }
 
 // Arrays
@@ -88,6 +96,22 @@ let fib = fn(n) {
 };
 
 let result = fib(10);  // Calculate 10th Fibonacci number
+```
+
+## Mutability
+
+Ember treats variables as immutable by default. This means that once a variable is assigned a value, that value cannot be changed. This helps prevent bugs and makes code easier to reason about.
+
+To create a mutable variable that can be reassigned, use the `mut` keyword:
+
+```typescript
+// Immutable variable (default)
+let x = 5;
+// x = 10;  // Error: Cannot assign to immutable variable: x
+
+// Mutable variable
+let mut y = 5;
+y = 10;  // Works fine
 ```
 
 ## Getting Started

@@ -5,16 +5,19 @@
 ### 1.1 Keywords
 
 - `let`: Variable declaration
+- `mut`: Mutability modifier
 - `fn`: Function definition
 - `if`, `else`: Control flow
 - `return`: Return statement
 - `true`, `false`: Boolean literals
+- `while`, `for`: Loop constructs
 
 ### 1.2 Operators
 
 - Arithmetic: `+`, `-`, `*`, `/`
 - Comparison: `==`, `!=`, `<`, `>`, `<=`, `>=`
 - Logical: `!`
+- Assignment: `=`
 
 ### 1.3 Delimiters
 
@@ -26,10 +29,40 @@
 ### 2.1 Variable Declaration
 
 ```
-let <identifier> = <expression>;
+let [mut] <identifier> = <expression>;
 ```
 
-### 2.2 Function Definition
+Variables are immutable by default. The `mut` keyword makes a variable mutable, allowing reassignment.
+
+Examples:
+
+```
+let x = 5;           // Immutable variable
+let mut y = 10;      // Mutable variable
+
+y = 20;              // Valid - y is mutable
+x = 30;              // Error - x is immutable
+```
+
+### 2.2 Assignment Expression
+
+```
+<identifier> = <expression>
+```
+
+Assignment is only valid for mutable variables. Attempting to assign to an immutable variable results in a runtime error.
+
+Example:
+
+```
+let mut counter = 0;
+counter = counter + 1;  // Valid - counter is mutable
+
+let value = 5;
+value = 10;            // Error - value is immutable
+```
+
+### 2.3 Function Definition
 
 ```
 let <name> = fn(<params>) {
@@ -45,7 +78,18 @@ let makeAdder = fn(x) {
 };
 ```
 
-### 2.3 Control Flow
+Function parameters are immutable by default. They cannot be reassigned within the function body.
+
+Example:
+
+```
+let increment = fn(x) {
+    x = x + 1;  // Error - function parameters are immutable
+    return x;
+};
+```
+
+### 2.4 Control Flow
 
 #### If Statements
 
@@ -68,7 +112,7 @@ while (<condition>) {
     <body>
 }
 
-for (let <var> = <init>; <condition>; <increment>) {
+for (let [mut] <var> = <init>; <condition>; <increment>) {
     <body>
 }
 ```
@@ -76,10 +120,10 @@ for (let <var> = <init>; <condition>; <increment>) {
 Example:
 
 ```typescript
-// While loop with increment
-let i = 0;
+// While loop with mutable counter
+let mut i = 0;
 while (i < 5) {
-  let i = i++;
+  i = i + 1;
 }
 
 // Equivalent for loop
@@ -113,14 +157,41 @@ From highest to lowest:
 4. `+`, `-` - Addition, Subtraction
 5. `>`, `<`, `>=`, `<=` - Comparison
 6. `==`, `!=` - Equality
+7. `=` - Assignment
 
-## 5. Scoping
+## 5. Scoping and Mutability
 
 - Lexical scoping
 - Functions create new scopes
 - Closures capture their environment
 - Variables must be declared before use
-- No variable shadowing in the same scope
+- Variables are immutable by default
+- The `mut` keyword makes variables mutable
+- Function parameters are immutable
+- Variables can be shadowed in nested scopes
+
+### 5.1 Variable Shadowing
+
+Variables can be shadowed in nested scopes. The inner variable is distinct from the outer variable, even if they have the same name.
+
+Example:
+
+```
+let x = 5;
+if (true) {
+    let x = 10;  // Shadows outer x
+    print(x);    // Prints 10
+}
+print(x);        // Prints 5
+```
+
+### 5.2 Mutability Rules
+
+1. Variables are immutable by default
+2. The `mut` keyword makes a variable mutable
+3. Function parameters are immutable
+4. Assignment is only valid for mutable variables
+5. Mutability is checked at runtime
 
 ## 6. Error Handling
 
@@ -130,6 +201,7 @@ The interpreter reports:
 - Type errors during evaluation
 - Undefined variable references
 - Invalid operator usage
+- Mutability violations (attempting to assign to immutable variables)
 
 ## Built-in Functions
 
@@ -168,6 +240,13 @@ let sumOfSquares = reduce(squares, add, 0);
 
 // Built-in arithmetic
 let result = add(mul(5, 2), div(10, 2));  // 15
+
+// Mutability example
+let mut counter = 0;
+while (counter < 5) {
+    counter = counter + 1;
+    print(counter);
+}
 ```
 
 ## Type System
@@ -199,6 +278,7 @@ The interpreter reports:
 - Invalid operator usage
 - Invalid function arguments
 - Array operation errors
+- Mutability violations (attempting to assign to immutable variables)
 
 ## Command Line Interface
 
