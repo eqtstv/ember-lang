@@ -13,9 +13,11 @@ Ember is an interpreted programming language implemented in Go, designed to be s
 - Array operations (`map`, `reduce`, `push`)
 - Built-in functions for common operations
 - Variables with `let` keyword
+- Immutability by default with explicit `mut` keyword
 - Return statements
 - Operator precedence parsing
 - REPL with error reporting
+- Comments using `//`
 
 ## Language Syntax
 
@@ -27,17 +29,25 @@ let age = 25;
 let temperature = 18 + 5;
 let isHot = temperature > 20;
 
+// Mutability
+let x = 5;         // Immutable by default
+// x = 10;         // Error: Cannot assign to immutable variable: x
+
+let mut y = 5;     // Explicitly mutable
+y = 10;            // Works fine
+
 // For loop
 for (let i = 0; i < 5; i++) {
-    print(i);
+    let forIndex = i;
 }
+print(forIndex);
 
 // While loop
-let i = 0;
+let mut i = 0;
 while (i < 5) {
-    print(i);
-    let i = i++;
+    i = i + 1;
 }
+print(i);
 
 // Arrays
 let numbers = [1, 2, 3, 4, 5];
@@ -52,12 +62,14 @@ let person = {
     "city": "New York"
 };
 let name = person["name"];  // "John"
+print(name);
 
 // Functions
 let greet = fn(name) {
     return "Hello, " + name + "!";
 };
-greet("John");  // Returns "Hello, John!"
+let greeting = greet("John");  // Returns "Hello, John!"
+print(greeting);
 
 // Conditionals
 let max = fn(a, b) {
@@ -76,8 +88,10 @@ let makeAdder = fn(x) {
 };
 
 let addFive = makeAdder(5);
-addFive(10);   // Returns 15
-addFive(20);   // Returns 25
+let mut result = addFive(10);   // Returns 15
+print(result);
+result = addFive(20);   // Returns 25
+print(result);
 
 // Recursive functions
 let fib = fn(n) {
@@ -87,7 +101,24 @@ let fib = fn(n) {
     return fib(n - 1) + fib(n - 2);
 };
 
-let result = fib(10);  // Calculate 10th Fibonacci number
+let mut result = fib(10);  // Calculate 10th Fibonacci number
+print(result); // 55
+```
+
+## Mutability
+
+Ember treats variables as immutable by default. This means that once a variable is assigned a value, that value cannot be changed. This helps prevent bugs and makes code easier to reason about.
+
+To create a mutable variable that can be reassigned, use the `mut` keyword:
+
+```typescript
+// Immutable variable (default)
+let x = 5;
+// x = 10;  // Error: Cannot assign to immutable variable: x
+
+// Mutable variable
+let mut y = 5;
+y = 10;  // Works fine
 ```
 
 ## Getting Started

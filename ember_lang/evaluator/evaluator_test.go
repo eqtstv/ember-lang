@@ -720,9 +720,9 @@ func TestIncrementExpression(t *testing.T) {
 		input    string
 		expected int64
 	}{
-		{`let i = 0; let i = i++; return i;`, 1},
-		{`let i = 0; let i = i++; let i = i++; return i;`, 2},
-		{`let i = 0; let i = i++; let i = i++; let i = i++; return i;`, 3},
+		{`let mut i = 0; i = i++; return i;`, 1},
+		{`let mut i = 0; i = i++; i = i++; return i;`, 2},
+		{`let mut i = 0; i = i++; i = i++; i = i++; return i;`, 3},
 	}
 
 	for _, tt := range tests {
@@ -737,9 +737,9 @@ func TestWhileExpression(t *testing.T) {
 		expected int64
 	}{
 		{`
-			let i = 0;
+			let mut i = 0;
 			while (i < 10) {
-				let i = i++;
+				i = i++;
 			}
 			return i;
 		`, 10},
@@ -758,6 +758,13 @@ func TestForExpression(t *testing.T) {
 		expected int64
 	}{
 		{`
+			for (let i = 0; i < 10; i++) {
+				let x = 0;
+			}
+			return x;
+		`, 0},
+		{`
+			let mut x = 0;
 			for (let i = 0; i < 10; i++) {
 				let x = i;
 			}
@@ -781,7 +788,7 @@ func TestForExpression(t *testing.T) {
 		`, 6},
 		// Empty loop (no iterations)
 		{`
-			let x = 5;
+			let mut x = 5;
 			for (let i = 0; i < 0; i++) {
 				let x = 10;
 			}
@@ -816,4 +823,292 @@ func TestBuiltinTypeFunction(t *testing.T) {
 		testStringObject(t, evaluated, tt.expected)
 	}
 
+}
+
+func TestAssignmentExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{`let mut x = 10; x = 5; return x;`, 5},
+		{`let mut x = 10; x = 5; let mut x = 6; return x;`, 6},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
+// Add this test function to test mutability in assignments
+func TestMutabilityInAssignments(t *testing.T) {
+	tests := []struct {
+		input           string
+		expectedResult  any
+		expectedError   bool
+		expectedMessage string
+	}{
+		// Mutable variables can be reassigned
+		{"let mut x = 5; x = 10; return x;", 10, false, ""},
+		// // Immutable variables cannot be reassigned
+		{"let x = 5; x = 10; return x;", nil, true, "(line 1) Cannot assign to immutable variable: x"},
+		// // Nested scopes respect mutability
+		{"let mut x = 5; if (true) { x = 20; }; return x;", 20, false, ""},
+		{"let x = 5; if (true) { x = 20; }; return x;", nil, true, "(line 1) Cannot assign to immutable variable: x"},
+		// // Function parameters are immutable by default
+		{"let f = fn(x) { x = 20; return x; }; f(5);", nil, true, "(line 1) Cannot assign to immutable variable: x"},
+		// // Loop variables can be mutable
+		{"let mut sum = 0; for (let i = 0; i < 5; i++) { sum = sum + i; }; return sum;", 10, false, ""},
+		// // Complex example with multiple variables
+		{`
+			let mut counter = 0;
+			let immutable = 100;
+			let mut result = 0;
+
+			while (counter < 5) {
+				result = result + counter;
+				counter = counter + 1;
+			}
+
+			return result;
+		`, 10, false, ""},
+		// // Reassigning to a variable multiple times
+		{"let mut x = 5; x = 10; x = 15; return x;", 15, false, ""},
+		// // Assigning the result of an expression
+		{"let mut x = 5; x = 2 + 3 * 4; return x;", 14, false, ""},
+		// // Assigning the value of another variable
+		{"let y = 10; let mut x = 5; x = y; return x;", 10, false, ""},
+		// // Assigning in a nested block
+		{"let mut x = 5; if (true) { if (true) { x = 20; } }; return x;", 20, false, ""},
+		// // Shadowing variables
+		// {"let mut x = 5; let y = 10; if (true) { let x = 20; }; return x;", 5, false, ""},
+		// // Trying to assign to a shadowed variable
+		// {"let x = 5; if (true) { let mut x = 10; x = 20; }; return x;", 5, false, ""},
+		// Mutability in arrays
+		{`
+			let numbers = [1, 2, 3];
+			numbers[0] = 10;
+		`, nil, true, "(line 3) Cannot assign to immutable variable: numbers"},
+		{`
+			let mut numbers = [1, 2, 3];
+			numbers[0] = 10;
+			return numbers[0];
+		`, 10, false, ""},
+		{`
+			let mapping = {"a": 1, "b": 2, "c": 3};
+			mapping["a"] = 10;
+			return mapping["a"];
+		`, nil, true, "(line 3) Cannot assign to immutable variable: mapping"},
+		{`
+			let mut mapping = {"a": 1, "b": 2, "c": 3};
+			mapping["a"] = 10;
+			return mapping["a"];
+		`, 10, false, ""},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+
+		if tt.expectedError {
+			errObj, ok := evaluated.(*object.Error)
+			if !ok {
+				t.Errorf("Expected error for input: %s, got %T (%+v)", tt.input, evaluated, evaluated)
+				continue
+			}
+
+			if errObj.Message != tt.expectedMessage {
+				t.Errorf("Wrong error message. expected=%q, got=%q",
+					tt.expectedMessage, errObj.Message)
+			}
+		} else {
+			if intObj, ok := tt.expectedResult.(int); ok {
+				testIntegerObject(t, evaluated, int64(intObj))
+			} else {
+				t.Errorf("Unexpected result type: %T", tt.expectedResult)
+			}
+		}
+	}
+}
+
+// Test environment mutability tracking
+func TestEnvironmentMutabilityTracking(t *testing.T) {
+	env := object.NewEnvironment()
+
+	// Set immutable variable
+	env.Set("x", &object.Integer{Value: 5}, false)
+
+	// Set mutable variable
+	env.Set("y", &object.Integer{Value: 10}, true)
+
+	// Check mutability
+	if env.IsMutable("x") {
+		t.Errorf("Expected x to be immutable")
+	}
+
+	if !env.IsMutable("y") {
+		t.Errorf("Expected y to be mutable")
+	}
+
+	// Test with enclosed environment
+	enclosed := object.NewEnclosedEnvironment(env)
+
+	// Check if outer variables are accessible and maintain mutability
+	x, ok := enclosed.Get("x")
+	if !ok {
+		t.Errorf("Expected to find x in enclosed environment")
+	}
+	if x.(*object.Integer).Value != 5 {
+		t.Errorf("Wrong value for x. got=%d, want=%d", x.(*object.Integer).Value, 5)
+	}
+	if enclosed.IsMutable("x") {
+		t.Errorf("Expected x to be immutable in enclosed environment")
+	}
+
+	y, ok := enclosed.Get("y")
+	if !ok {
+		t.Errorf("Expected to find y in enclosed environment")
+	}
+	if y.(*object.Integer).Value != 10 {
+		t.Errorf("Wrong value for y. got=%d, want=%d", y.(*object.Integer).Value, 10)
+	}
+	if !enclosed.IsMutable("y") {
+		t.Errorf("Expected y to be mutable in enclosed environment")
+	}
+
+	// Set new variables in enclosed environment
+	enclosed.Set("z", &object.Integer{Value: 15}, false)
+	enclosed.Set("w", &object.Integer{Value: 20}, true)
+
+	// Check new variables
+	if enclosed.IsMutable("z") {
+		t.Errorf("Expected z to be immutable")
+	}
+	if !enclosed.IsMutable("w") {
+		t.Errorf("Expected w to be mutable")
+	}
+
+	// Outer environment shouldn't see enclosed variables
+	_, ok = env.Get("z")
+	if ok {
+		t.Errorf("Outer environment shouldn't see z")
+	}
+}
+
+// Test assignment in complex expressions
+func TestAssignmentInComplexExpressions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		// Assignment in if condition
+		{`
+			let mut x = 5;
+			if ((x = 10) > 5) {
+				return x;
+			}
+			return 0;
+		`, 10},
+
+		// Assignment in loop condition
+		{`
+			let mut x = 0;
+			while (x < 5) {
+				x = x + 1;
+			}
+			return x;
+		`, 5},
+
+		// Assignment with function calls
+		{`
+			let mut x = 0;
+			let f = fn() { return 10; };
+			x = f();
+			return x;
+		`, 10},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
+func TestEvalQuickSortAlgorithm(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []int64
+	}{
+		{`
+		let partition = fn(arr, low, high) {
+			let mut arr = arr;
+			let pivot = arr[high];
+			
+			let mut i = low - 1;
+			
+			for (let j = low; j < high; j++) {
+				if (arr[j] < pivot) {
+					i = i + 1;
+					
+					let temp = arr[i];
+					arr[i] = arr[j];
+					arr[j] = temp;
+				}
+			}
+			
+			let temp = arr[i + 1];
+			arr[i + 1] = arr[high];
+			arr[high] = temp;
+			
+			return i + 1;
+		};
+
+		let quicksort = fn(arr, low, high) {
+			if (low < high) {
+				let pi = partition(arr, low, high);
+				
+				quicksort(arr, low, pi - 1);
+				quicksort(arr, pi + 1, high);
+			}
+			
+			return arr;
+		};
+
+		let array = [10, 7, 8, 9, 1, 5, 3, 2, 6, 4];
+		let sorted = quicksort(array, 0, len(array) - 1);
+
+		return sorted;
+		`, []int64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		if evaluated == nil {
+			t.Errorf("Expected evaluated to be non-nil for input: %s", tt.input)
+			continue
+		}
+
+		if array, ok := evaluated.(*object.Array); ok {
+			if len(array.Elements) != len(tt.expected) {
+				t.Errorf("Expected array length %d, got %d", len(tt.expected), len(array.Elements))
+				continue
+			}
+
+			for i, element := range array.Elements {
+				if element == nil {
+					t.Errorf("Expected element %d to be non-nil", i)
+					continue
+				}
+
+				if intObj, ok := element.(*object.Integer); ok {
+					if intObj.Value != tt.expected[i] {
+						t.Errorf("Expected element %d to be %d, got %d", i, tt.expected[i], intObj.Value)
+					}
+				} else {
+					t.Errorf("Expected element %d to be an integer, got %T", i, element)
+				}
+			}
+		} else {
+			t.Errorf("Expected evaluated to be an array, got %T", evaluated)
+		}
+	}
 }

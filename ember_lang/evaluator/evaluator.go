@@ -32,7 +32,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		if isError(val) {
 			return val
 		}
-		env.Set(node.Name.Value, val)
+		env.Set(node.Name.Value, val, node.Name.Mutable)
 		return val
 
 	// Expressions
@@ -76,7 +76,6 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return index
 		}
 		return evalIndexExpression(left, index)
-
 	case *ast.IfExpression:
 		return evalIfExpression(node, env)
 	case *ast.Identifier:
@@ -107,6 +106,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalWhileExpression(node, env)
 	case *ast.ForExpression:
 		return evalForExpression(node, env)
+	case *ast.AssignmentExpression:
+		return evalAssignmentExpression(node, env)
 	}
 
 	return nil
@@ -177,7 +178,7 @@ func extendFunctionEnv(fn *object.Function, args []object.Object) *object.Enviro
 	env := object.NewEnclosedEnvironment(fn.Env)
 
 	for paramIdx, param := range fn.Parameters {
-		env.Set(param.Value, args[paramIdx])
+		env.Set(param.Value, args[paramIdx], param.Mutable)
 	}
 	return env
 }
@@ -427,7 +428,11 @@ func evalWhileExpression(node *ast.WhileExpression, env *object.Environment) obj
 	}
 
 	for isTruthy(condition) {
-		Eval(node.Body, env)
+		result := Eval(node.Body, env)
+		if isError(result) {
+			return result
+		}
+
 		condition = Eval(node.Condition, env)
 		if isError(condition) {
 			return condition
@@ -441,7 +446,7 @@ func evalForExpression(node *ast.ForExpression, env *object.Environment) object.
 	letStatement := node.LetStatement
 
 	// Set the initial value of the loop variable
-	env.Set(letStatement.Name.Value, Eval(letStatement.Value, env))
+	env.Set(letStatement.Name.Value, Eval(letStatement.Value, env), true)
 
 	for {
 		condition := Eval(node.Condition, env)
@@ -459,10 +464,103 @@ func evalForExpression(node *ast.ForExpression, env *object.Environment) object.
 			return increment
 		}
 
-		env.Set(letStatement.Name.Value, increment)
+		env.Set(letStatement.Name.Value, increment, true)
 	}
 
 	return NULL
+}
+
+func evalAssignmentExpression(node *ast.AssignmentExpression, env *object.Environment) object.Object {
+	// Assignment to a variable
+	if identifier, ok := node.Left.(*ast.Identifier); ok {
+		// Check if the variable is mutable
+		if !env.IsMutable(identifier.Value) {
+			return newError("(line %d) Cannot assign to immutable variable: %s", identifier.Token.LineNumber, identifier.Value)
+		}
+
+		// Evaluate the right-hand side of the assignment
+		right := Eval(node.Right, env)
+		if isError(right) {
+			return right
+		}
+
+		// Set the value of the variable
+		env.Set(identifier.Value, right, true)
+
+		// Return the value of the assignment
+		return right
+	}
+
+	// Assignment to an Index Expression
+	// eg. arr[0] = 1, map[key] = value
+	if indexExpression, ok := node.Left.(*ast.IndexExpression); ok {
+		// Evaluate the left-hand side of the assignment
+		left := Eval(indexExpression.Left, env)
+		if isError(left) {
+			return left
+		}
+
+		// Check if the variable is mutable
+		if identifier, ok := indexExpression.Left.(*ast.Identifier); ok {
+			if !env.IsMutable(identifier.Value) {
+				return newError("(line %d) Cannot assign to immutable variable: %s", identifier.Token.LineNumber, identifier.Value)
+			}
+		} else {
+			// Handle nested index expressions or other complex left sides
+			// This allows for cases like: arr[i][j] = value
+			return newError("(line %d) Complex index expressions not yet supported for assignment", node.Token.LineNumber)
+		}
+
+		// Evaluate the index of the assignment
+		index := Eval(indexExpression.Index, env)
+		if isError(index) {
+			return index
+		}
+
+		// Evaluate the right-hand side of the assignment
+		right := Eval(node.Right, env)
+		if isError(right) {
+			return right
+		}
+
+		// Assign the value to the index of the array or map
+		switch left := left.(type) {
+		// Array Assignment
+		case *object.Array:
+			indexValue, ok := index.(*object.Integer)
+			if !ok {
+				return newError("(line %d) Array index must be an integer", node.Token.LineNumber)
+			}
+
+			idx := indexValue.Value
+			// Support negative indices (like Python)
+			if idx < 0 {
+				idx = int64(len(left.Elements)) + idx
+			}
+
+			// Check bounds
+			if idx < 0 || idx >= int64(len(left.Elements)) {
+				return newError("(line %d) Array index out of bounds: %d", node.Token.LineNumber, idx)
+			}
+
+			left.Elements[idx] = right
+			return right
+
+		// Map Assignment
+		case *object.Hash:
+			key, ok := index.(object.Hashable)
+			if !ok {
+				return newError("(line %d) Unusable as hash key: %s", node.Token.LineNumber, index.Type())
+			}
+			left.Pairs[key.HashKey()] = object.HashPair{Key: index, Value: right}
+			return right
+
+		default:
+			return newError("(line %d) Cannot index into type: %s", node.Token.LineNumber, left.Type())
+		}
+	}
+
+	return newError("(line %d) invalid assignment target", node.Token.LineNumber)
 }
 
 func isTruthy(obj object.Object) bool {

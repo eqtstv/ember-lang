@@ -8,13 +8,15 @@ func NewEnclosedEnvironment(outer *Environment) *Environment {
 
 func NewEnvironment() *Environment {
 	store := make(map[string]Object)
-	return &Environment{store: store}
+	mutable := make(map[string]bool)
+	return &Environment{store: store, mutable: mutable}
 
 }
 
 type Environment struct {
-	store map[string]Object
-	outer *Environment
+	store   map[string]Object
+	outer   *Environment
+	mutable map[string]bool
 }
 
 func (e *Environment) Get(name string) (Object, bool) {
@@ -25,7 +27,23 @@ func (e *Environment) Get(name string) (Object, bool) {
 	return obj, ok
 }
 
-func (e *Environment) Set(name string, val Object) Object {
+func (e *Environment) Set(name string, val Object, mutable bool) Object {
 	e.store[name] = val
+	e.mutable[name] = mutable
 	return val
+}
+
+func (e *Environment) IsMutable(name string) bool {
+	mutable, ok := e.mutable[name]
+	if ok {
+		return mutable
+	}
+
+	// If not found in current environment, check outer environment
+	if e.outer != nil {
+		return e.outer.IsMutable(name)
+	}
+
+	// Default to immutable if not found
+	return false
 }

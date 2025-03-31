@@ -26,8 +26,9 @@ type Expression interface {
 // ------------------------------------- Identifier -------------------------------------
 
 type Identifier struct {
-	Token token.Token // token.IDENTIFIER token
-	Value string
+	Token   token.Token // token.IDENTIFIER token
+	Value   string
+	Mutable bool
 }
 
 func (i *Identifier) expressionNode() {}
@@ -519,6 +520,25 @@ func (fe *ForExpression) String() string {
 	out.WriteString(" {")
 	out.WriteString(fe.Body.String())
 	out.WriteString("}")
+
+	return out.String()
+}
+
+// ------------------------------------- AssignmentExpression -------------------------------------
+type AssignmentExpression struct {
+	Token token.Token // The '=' token
+	Left  Expression
+	Right Expression
+}
+
+func (ae *AssignmentExpression) expressionNode()      {}
+func (ae *AssignmentExpression) TokenLiteral() string { return ae.Token.Literal }
+func (ae *AssignmentExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(ae.Left.String())
+	out.WriteString(" = ")
+	out.WriteString(ae.Right.String())
 
 	return out.String()
 }

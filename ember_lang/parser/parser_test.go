@@ -753,3 +753,78 @@ func TestParsingForExpression(t *testing.T) {
 		return
 	}
 }
+
+func TestParsingInvalidAssignmentTargets(t *testing.T) {
+	tests := []struct {
+		input           string
+		expectedMessage string
+	}{
+		{"5 = 10;", "(line 1) invalid assignment target"},
+		{"true = false;", "(line 1) invalid assignment target"},
+		{"\"hello\" = \"world\";", "(line 1) invalid assignment target"},
+		{"(x + y) = 10;", "(line 1) invalid assignment target"},
+		{"fn(x) { x } = 10;", "(line 1) invalid assignment target"},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		p.ParseProgram()
+
+		if len(p.Errors()) == 0 {
+			t.Errorf("parser.ParseProgram() didn't return any errors for invalid input: %s", tt.input)
+			continue
+		}
+
+		if p.Errors()[0] != tt.expectedMessage {
+			t.Errorf("wrong error message. expected=%q, got=%q",
+				tt.expectedMessage, p.Errors()[0])
+		}
+	}
+}
+
+func TestParsingMutableLetStatements(t *testing.T) {
+	tests := []struct {
+		input              string
+		expectedIdentifier string
+		expectedValue      interface{}
+		expectedMutable    bool
+	}{
+		{"let x = 5;", "x", 5, false},
+		{"let mut y = 10;", "y", 10, true},
+		{"let mut foobar = y;", "foobar", "y", true},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements does not contain 1 statements. got=%d",
+				len(program.Statements))
+		}
+
+		stmt := program.Statements[0]
+		if !testLetStatement(t, stmt, tt.expectedIdentifier) {
+			return
+		}
+
+		letStmt, ok := stmt.(*ast.LetStatement)
+		if !ok {
+			t.Fatalf("stmt not *ast.LetStatement. got=%T", stmt)
+			return
+		}
+
+		if letStmt.Name.Mutable != tt.expectedMutable {
+			t.Errorf("letStmt.Name.Mutable wrong. expected=%t, got=%t",
+				tt.expectedMutable, letStmt.Name.Mutable)
+		}
+
+		val := letStmt.Value
+		if !testLiteralExpression(t, val, tt.expectedValue) {
+			return
+		}
+	}
+}

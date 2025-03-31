@@ -270,3 +270,42 @@ func TestSourceCodeWithReturns(t *testing.T) {
 		}
 	}
 }
+
+func TestCommentTokens(t *testing.T) {
+	input := `
+	// This is a comment
+	let x = 5; // This is an end-of-line comment
+	// Another comment
+	`
+
+	tests := []struct {
+		expectedType    token.TokenType
+		expectedLiteral string
+	}{
+		{token.COMMENT, " This is a comment"},
+		{token.LET, "let"},
+		{token.IDENTIFIER, "x"},
+		{token.ASSIGN, "="},
+		{token.INT, "5"},
+		{token.SEMICOLON, ";"},
+		{token.COMMENT, " This is an end-of-line comment"},
+		{token.COMMENT, " Another comment"},
+		{token.EOF, ""},
+	}
+
+	l := New(input)
+
+	for i, tt := range tests {
+		tok := l.NextToken()
+
+		if tok.Type != tt.expectedType {
+			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q",
+				i, tt.expectedType, tok.Type)
+		}
+
+		if tok.Literal != tt.expectedLiteral {
+			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
+				i, tt.expectedLiteral, tok.Literal)
+		}
+	}
+}

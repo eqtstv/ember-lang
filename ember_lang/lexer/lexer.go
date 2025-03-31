@@ -56,7 +56,13 @@ func (l *Lexer) NextToken() token.Token {
 	case '-':
 		tok = newToken(token.MINUS, l.ch, l.lineNumber)
 	case '/':
-		tok = newToken(token.SLASH, l.ch, l.lineNumber)
+		if l.peekChar() == '/' {
+			tok.Type = token.COMMENT
+			tok.Literal = l.readComment()
+			return tok
+		} else {
+			tok = newToken(token.SLASH, l.ch, l.lineNumber)
+		}
 	case '*':
 		tok = newToken(token.ASTERISK, l.ch, l.lineNumber)
 	case '<':
@@ -186,4 +192,15 @@ func (l *Lexer) skipWhitespace() {
 
 func newToken(tokenType token.TokenType, ch byte, lineNumber int) token.Token {
 	return token.Token{Type: tokenType, Literal: string(ch), LineNumber: lineNumber}
+}
+
+// readComment skips over the characters until the end of the line
+func (l *Lexer) readComment() string {
+	position := l.position + 2 // Skip the "//"
+
+	for l.ch != '\n' && l.ch != 0 {
+		l.readChar()
+	}
+
+	return l.input[position:l.position]
 }
