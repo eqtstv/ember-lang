@@ -494,16 +494,21 @@ func evalAssignmentExpression(node *ast.AssignmentExpression, env *object.Enviro
 	// Assignment to an Index Expression
 	// eg. arr[0] = 1, map[key] = value
 	if indexExpression, ok := node.Left.(*ast.IndexExpression); ok {
-		// Check if the variable is mutable
-		identifier := indexExpression.Left.(*ast.Identifier)
-		if !env.IsMutable(identifier.Value) {
-			return newError("(line %d) Cannot assign to immutable variable: %s", identifier.Token.LineNumber, identifier.Value)
-		}
-
 		// Evaluate the left-hand side of the assignment
 		left := Eval(indexExpression.Left, env)
 		if isError(left) {
 			return left
+		}
+
+		// Check if the variable is mutable
+		if identifier, ok := indexExpression.Left.(*ast.Identifier); ok {
+			if !env.IsMutable(identifier.Value) {
+				return newError("(line %d) Cannot assign to immutable variable: %s", identifier.Token.LineNumber, identifier.Value)
+			}
+		} else {
+			// Handle nested index expressions or other complex left sides
+			// This allows for cases like: arr[i][j] = value
+			return newError("(line %d) Complex index expressions not yet supported for assignment", node.Token.LineNumber)
 		}
 
 		// Evaluate the index of the assignment
@@ -522,20 +527,37 @@ func evalAssignmentExpression(node *ast.AssignmentExpression, env *object.Enviro
 		switch left := left.(type) {
 		// Array Assignment
 		case *object.Array:
-			indexValue := index.(*object.Integer).Value
-			left.Elements[indexValue] = right
+			indexValue, ok := index.(*object.Integer)
+			if !ok {
+				return newError("(line %d) Array index must be an integer", node.Token.LineNumber)
+			}
+
+			idx := indexValue.Value
+			// Support negative indices (like Python)
+			if idx < 0 {
+				idx = int64(len(left.Elements)) + idx
+			}
+
+			// Check bounds
+			if idx < 0 || idx >= int64(len(left.Elements)) {
+				return newError("(line %d) Array index out of bounds: %d", node.Token.LineNumber, idx)
+			}
+
+			left.Elements[idx] = right
 			return right
+
 		// Map Assignment
 		case *object.Hash:
 			key, ok := index.(object.Hashable)
 			if !ok {
-				return newError("(line %d) invalid assignment target", node.Token.LineNumber)
+				return newError("(line %d) Unusable as hash key: %s", node.Token.LineNumber, index.Type())
 			}
 			left.Pairs[key.HashKey()] = object.HashPair{Key: index, Value: right}
 			return right
-		}
 
-		return newError("(line %d) invalid assignment target", node.Token.LineNumber)
+		default:
+			return newError("(line %d) Cannot index into type: %s", node.Token.LineNumber, left.Type())
+		}
 	}
 
 	return newError("(line %d) invalid assignment target", node.Token.LineNumber)
