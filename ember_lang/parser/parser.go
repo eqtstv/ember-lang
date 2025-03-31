@@ -19,6 +19,7 @@ const (
 	CALL        // myFunction(X)
 	INCREMENT   // i++
 	INDEX       // array[index]
+	ASSIGN      // =
 )
 
 var precedences = map[token.TokenType]int{
@@ -35,6 +36,7 @@ var precedences = map[token.TokenType]int{
 	token.LPAREN:    CALL,
 	token.INCREMENT: INCREMENT,
 	token.LBRACKET:  INDEX,
+	token.ASSIGN:    ASSIGN,
 }
 
 func (parser *Parser) peekPrecedence() int {
@@ -107,6 +109,7 @@ func New(lexer *lexer.Lexer) *Parser {
 	parser.registerInfix(token.LPAREN, parser.parseCallExpression)
 	parser.registerInfix(token.LBRACKET, parser.parseIndexExpression)
 	parser.registerInfix(token.INCREMENT, parser.parseIncrementExpression)
+	parser.registerInfix(token.ASSIGN, parser.parseAssignmentExpression)
 
 	// Read two tokens, so curToken and peekToken are both set
 	parser.nextToken()
@@ -573,7 +576,6 @@ func (parser *Parser) parseExpression(precedence int) ast.Expression {
 		parser.nextToken()
 
 		leftExp = infix(leftExp)
-
 	}
 
 	return leftExp
@@ -598,4 +600,22 @@ func (parser *Parser) parseBlockStatement() *ast.BlockStatement {
 	}
 
 	return block
+}
+
+func (parser *Parser) parseAssignmentExpression(left ast.Expression) ast.Expression {
+	// Check if the left side is a valid assignment target
+	if _, ok := left.(*ast.Identifier); !ok {
+		parser.errors = append(parser.errors, fmt.Sprintf("(line %d) invalid assignment target", parser.curToken.LineNumber))
+	}
+
+	expression := &ast.AssignmentExpression{
+		Token: parser.curToken,
+		Left:  left,
+	}
+
+	precedence := parser.curPrecedence()
+	parser.nextToken()
+	expression.Right = parser.parseExpression(precedence)
+
+	return expression
 }

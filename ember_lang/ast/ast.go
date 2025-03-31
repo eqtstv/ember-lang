@@ -522,3 +522,22 @@ func (fe *ForExpression) String() string {
 
 	return out.String()
 }
+
+// ------------------------------------- AssignmentExpression -------------------------------------
+type AssignmentExpression struct {
+	Token token.Token // The '=' token
+	Left  Expression
+	Right Expression
+}
+
+func (ae *AssignmentExpression) expressionNode()      {}
+func (ae *AssignmentExpression) TokenLiteral() string { return ae.Token.Literal }
+func (ae *AssignmentExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(ae.Left.String())
+	out.WriteString(" = ")
+	out.WriteString(ae.Right.String())
+
+	return out.String()
+}

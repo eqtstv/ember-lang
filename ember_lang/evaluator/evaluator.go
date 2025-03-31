@@ -76,7 +76,6 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return index
 		}
 		return evalIndexExpression(left, index)
-
 	case *ast.IfExpression:
 		return evalIfExpression(node, env)
 	case *ast.Identifier:
@@ -107,6 +106,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalWhileExpression(node, env)
 	case *ast.ForExpression:
 		return evalForExpression(node, env)
+	case *ast.AssignmentExpression:
+		return evalAssignmentExpression(node, env)
 	}
 
 	return nil
@@ -463,6 +464,25 @@ func evalForExpression(node *ast.ForExpression, env *object.Environment) object.
 	}
 
 	return NULL
+}
+
+func evalAssignmentExpression(node *ast.AssignmentExpression, env *object.Environment) object.Object {
+	left := Eval(node.Left, env)
+	if isError(left) {
+		return left
+	}
+
+	right := Eval(node.Right, env)
+	if isError(right) {
+		return right
+	}
+
+	if identifier, ok := node.Left.(*ast.Identifier); ok {
+		env.Set(identifier.Value, right)
+		return NULL
+	}
+
+	return newError("invalid assignment target")
 }
 
 func isTruthy(obj object.Object) bool {

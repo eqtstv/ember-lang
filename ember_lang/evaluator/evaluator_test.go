@@ -817,3 +817,46 @@ func TestBuiltinTypeFunction(t *testing.T) {
 	}
 
 }
+
+func TestAssignmentExpressions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{"let x = 5; x = 10; x;", 10},
+		{"let y = 10; let x = y; y = 20; x;", 10},
+		{"let y = 10; let x = y; y = 20; y;", 20},
+		{"let x = 5; let y = 10; x = y; x;", 10},
+		{"let x = 5; let y = 10; x = y; y = 20; x;", 10},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testIntegerObject(t, evaluated, int64(tt.expected.(int)))
+	}
+}
+
+func TestAssignmentToUndefinedIdentifier(t *testing.T) {
+	tests := []struct {
+		input           string
+		expectedMessage string
+	}{
+		{"x = 5;", "Identifier not found: x"},
+		{"x = y;", "Identifier not found: x"},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+
+		errObj, ok := evaluated.(*object.Error)
+		if !ok {
+			t.Errorf("no error object returned. got=%T (%+v)", evaluated, evaluated)
+			continue
+		}
+
+		if errObj.Message != tt.expectedMessage {
+			t.Errorf("wrong error message. expected=%q, got=%q",
+				tt.expectedMessage, errObj.Message)
+		}
+	}
+}

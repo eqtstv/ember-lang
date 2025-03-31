@@ -753,3 +753,47 @@ func TestParsingForExpression(t *testing.T) {
 		return
 	}
 }
+
+func TestAssignmentExpressions(t *testing.T) {
+	tests := []struct {
+		input              string
+		expectedIdentifier string
+		expectedValue      interface{}
+	}{
+		{"x = 5;", "x", 5},
+		{"y = true;", "y", true},
+		{"foobar = y;", "foobar", "y"},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements does not contain 1 statement. got=%d",
+				len(program.Statements))
+		}
+
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+		if !ok {
+			t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+				program.Statements[0])
+		}
+
+		exp, ok := stmt.Expression.(*ast.AssignmentExpression)
+		if !ok {
+			t.Fatalf("stmt.Expression is not ast.AssignmentExpression. got=%T",
+				stmt.Expression)
+		}
+
+		if !testIdentifier(t, exp.Left, tt.expectedIdentifier) {
+			return
+		}
+
+		if !testLiteralExpression(t, exp.Right, tt.expectedValue) {
+			return
+		}
+	}
+}
