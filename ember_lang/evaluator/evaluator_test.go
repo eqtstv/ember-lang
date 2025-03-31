@@ -851,12 +851,12 @@ func TestMutabilityInAssignments(t *testing.T) {
 		// Mutable variables can be reassigned
 		{"let mut x = 5; x = 10; return x;", 10, false, ""},
 		// // Immutable variables cannot be reassigned
-		{"let x = 5; x = 10; return x;", nil, true, "Cannot assign to immutable variable: x"},
+		{"let x = 5; x = 10; return x;", nil, true, "(line 1) Cannot assign to immutable variable: x"},
 		// // Nested scopes respect mutability
 		{"let mut x = 5; if (true) { x = 20; }; return x;", 20, false, ""},
-		{"let x = 5; if (true) { x = 20; }; return x;", nil, true, "Cannot assign to immutable variable: x"},
+		{"let x = 5; if (true) { x = 20; }; return x;", nil, true, "(line 1) Cannot assign to immutable variable: x"},
 		// // Function parameters are immutable by default
-		{"let f = fn(x) { x = 20; return x; }; f(5);", nil, true, "Cannot assign to immutable variable: x"},
+		{"let f = fn(x) { x = 20; return x; }; f(5);", nil, true, "(line 1) Cannot assign to immutable variable: x"},
 		// // Loop variables can be mutable
 		{"let mut sum = 0; for (let i = 0; i < 5; i++) { sum = sum + i; }; return sum;", 10, false, ""},
 		// // Complex example with multiple variables
