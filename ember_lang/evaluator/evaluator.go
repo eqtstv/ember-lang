@@ -32,10 +32,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		if isError(val) {
 			return val
 		}
-		_, ok := env.Set(node.Name.Value, val, node.Name.Mutable)
-		if !ok {
-			return newError("(line %d) Cannot assign to immutable variable: %s", node.Token.LineNumber, node.Name.Value)
-		}
+		env.Set(node.Name.Value, val, node.Name.Mutable)
 		return val
 
 	// Expressions
@@ -181,10 +178,7 @@ func extendFunctionEnv(fn *object.Function, args []object.Object) *object.Enviro
 	env := object.NewEnclosedEnvironment(fn.Env)
 
 	for paramIdx, param := range fn.Parameters {
-		_, ok := env.Set(param.Value, args[paramIdx], param.Mutable)
-		if !ok {
-			panic(newError("(line %d) Cannot assign to immutable variable: %s", param.Token.LineNumber, param.Value))
-		}
+		env.Set(param.Value, args[paramIdx], param.Mutable)
 	}
 	return env
 }
@@ -452,11 +446,7 @@ func evalForExpression(node *ast.ForExpression, env *object.Environment) object.
 	letStatement := node.LetStatement
 
 	// Set the initial value of the loop variable
-	_, ok := env.Set(letStatement.Name.Value, Eval(letStatement.Value, env), true)
-
-	if !ok {
-		return newError("(line %d) Cannot assign to immutable variable: %s", letStatement.Token.LineNumber, letStatement.Name.Value)
-	}
+	env.Set(letStatement.Name.Value, Eval(letStatement.Value, env), true)
 
 	for {
 		condition := Eval(node.Condition, env)
@@ -474,10 +464,7 @@ func evalForExpression(node *ast.ForExpression, env *object.Environment) object.
 			return increment
 		}
 
-		_, ok = env.Set(letStatement.Name.Value, increment, true)
-		if !ok {
-			return newError("(line %d) Cannot assign to immutable variable: %s", letStatement.Token.LineNumber, letStatement.Name.Value)
-		}
+		env.Set(letStatement.Name.Value, increment, true)
 	}
 
 	return NULL
@@ -494,10 +481,7 @@ func evalAssignmentExpression(node *ast.AssignmentExpression, env *object.Enviro
 			return right
 		}
 
-		_, ok := env.Set(identifier.Value, right, true)
-		if !ok {
-			return newError("(line %d) Cannot assign to immutable variable: %s", identifier.Token.LineNumber, identifier.Value)
-		}
+		env.Set(identifier.Value, right, true)
 		return right
 	}
 

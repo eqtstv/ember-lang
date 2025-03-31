@@ -27,14 +27,10 @@ func (e *Environment) Get(name string) (Object, bool) {
 	return obj, ok
 }
 
-func (e *Environment) Set(name string, val Object, mutable bool) (Object, bool) {
-	// if e.VariableExists(name) && !e.IsMutable(name) {
-	// 	return &Error{Message: "Cannot assign to immutable variable: " + name}, false
-	// }
-
+func (e *Environment) Set(name string, val Object, mutable bool) Object {
 	e.store[name] = val
 	e.mutable[name] = mutable
-	return val, true
+	return val
 }
 
 func (e *Environment) IsMutable(name string) bool {
@@ -49,18 +45,5 @@ func (e *Environment) IsMutable(name string) bool {
 	}
 
 	// Default to immutable if not found
-	return false
-}
-
-func (e *Environment) VariableExists(name string) bool {
-	_, exists := e.store[name]
-	if exists {
-		return true
-	}
-
-	if e.outer != nil {
-		return e.outer.VariableExists(name)
-	}
-
 	return false
 }
