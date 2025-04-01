@@ -558,10 +558,6 @@ func evalAssignmentExpression(node *ast.AssignmentExpression, env *object.Enviro
 			if !env.IsMutable(identifier.Value) {
 				return newError("(line %d) Cannot assign to immutable variable: %s", identifier.Token.LineNumber, identifier.Value)
 			}
-		} else {
-			// Handle nested index expressions or other complex left sides
-			// This allows for cases like: arr[i][j] = value, *arr_ptr[i] = value
-
 		}
 
 		// Evaluate the index of the assignment
