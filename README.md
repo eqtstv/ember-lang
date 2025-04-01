@@ -14,7 +14,7 @@ Ember is an interpreted programming language implemented in Go, designed to be s
 - Built-in functions for common operations
 - Variables with `let` keyword
 - Immutability by default with explicit `mut` keyword
-- Pointers to variables
+- Pointers with reference `&` and dereference `*` operators
 - Return statements
 - Operator precedence parsing
 - REPL with error reporting
