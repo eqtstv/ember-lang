@@ -121,6 +121,16 @@ let mut y = 5;
 y = 10;  // Works fine
 ```
 
+### Pointers
+
+Ember supports pointers to variables.
+
+- Create pointers with the `&` operator
+- Dereference pointers with the `*` operator
+- Pointer arithmetic is not supported for memory safety
+
+See the [pointers example](examples/pointers.em) for more details.
+
 ## Getting Started
 
 You can use Ember in two ways:

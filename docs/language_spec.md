@@ -136,6 +136,76 @@ for (let i = 0; i < 5; i++) {
 
 Ember supports pointers for referencing variables. Pointers are created using the `&` operator and dereferenced using the `*` operator.
 
+#### 2.7.1 Creating Pointers
+
+The address-of operator `&` creates a pointer to a variable:
+
+```
+let x = 10;
+let p = &x;  // p is a pointer to x
+```
+
+#### 2.7.2 Dereferencing Pointers
+
+The dereference operator `*` accesses the value a pointer points to:
+
+```
+let x = 10;
+let p = &x;
+let y = *p;  // y is 10 (the value of x)
+```
+
+#### 2.7.3 Modifying Values Through Pointers
+
+Pointers can be used to modify the value of the variable they point to:
+
+```
+let mut x = 10;
+let p = &x;
+*p = 20;     // Changes x to 20
+```
+
+Note that the target variable must be mutable for modification through a pointer to work.
+
+#### 2.7.4 Pointers to Complex Data Structures
+
+Pointers can reference arrays and objects:
+
+```
+let mut arr = [1, 2, 3];
+let p = &arr;
+(*p)[0] = 42;  // Changes first element of arr to 42
+
+let mut obj = {"name": "Alice", "age": 30};
+let p = &obj;
+(*p)["age"] = 31;  // Changes age to 31
+```
+
+#### 2.7.5 Pointers in Functions
+
+Pointers are useful for modifying variables from within functions:
+
+```
+let modifyValue = fn(ptr) {
+  *ptr = *ptr * 2;
+};
+
+let mut x = 10;
+modifyValue(&x);  // x is now 20
+```
+
+#### 2.7.6 Pointer Safety
+
+- Null pointer checks are recommended before dereferencing
+- Pointer arithmetic is not supported to prevent memory safety issues
+- Pointers cannot be created to arbitrary memory addresses
+
+#### 2.7.7 Limitations
+
+- Pointers must point to valid variables
+- Dereferencing a null pointer causes a runtime error
+- Pointer arithmetic (adding/subtracting from pointer addresses) is not supported
+
 ## 3. Type System
 
 Currently supported types:
