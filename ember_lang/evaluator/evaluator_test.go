@@ -2,6 +2,7 @@ package evaluator
 
 import (
 	"ember_lang/ember_lang/object"
+	"strings"
 	"testing"
 )
 
@@ -1109,6 +1110,140 @@ func TestEvalQuickSortAlgorithm(t *testing.T) {
 			}
 		} else {
 			t.Errorf("Expected evaluated to be an array, got %T", evaluated)
+		}
+	}
+}
+
+func TestPointerOperations(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			`
+			let mut x = 5;
+			let p = &x;
+			*p;
+			`,
+			5,
+		},
+		{
+			`
+			let mut x = 5;
+			let p = &x;
+			*p = 10;
+			x;
+			`,
+			10,
+		},
+		{
+			`
+			let mut x = 5;
+			let p = &x;
+			let mut y = *p;
+			y = 10;
+			x;
+			`,
+			5, // x should remain unchanged
+		},
+		{
+			`
+			let mut x = 5;
+			let p = &x;
+			x = 10;
+			*p;
+			`,
+			10, // dereferencing p should reflect the new value of x
+		},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+
+		switch expected := tt.expected.(type) {
+		case int:
+			testIntegerObject(t, evaluated, int64(expected))
+		}
+	}
+}
+
+func TestPointerErrors(t *testing.T) {
+	tests := []struct {
+		input           string
+		expectedMessage string
+	}{
+		{
+			`
+			let x = 5;  // immutable
+			let p = &x;
+			*p = 10;
+			`,
+			"Cannot assign to immutable variable: x",
+		},
+		{
+			`
+			&5;
+			`,
+			"Cannot take address of non-identifier expression",
+		},
+		{
+			`
+			let x = 5;
+			*x;
+			`,
+			"Cannot dereference non-pointer value: INTEGER",
+		},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+
+		errObj, ok := evaluated.(*object.Error)
+		if !ok {
+			t.Errorf("Expected error object, got %T (%+v)", evaluated, evaluated)
+			continue
+		}
+
+		if !strings.Contains(errObj.Message, tt.expectedMessage) {
+			t.Errorf("Expected error message to contain %q, got %q",
+				tt.expectedMessage, errObj.Message)
+		}
+	}
+}
+
+func TestPointerArrayAssignment(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []int64
+	}{
+		{
+			`
+			let mut arr = [1, 2, 3];
+			let p = &arr;
+			*p = [4, 5, 6];
+			arr;
+			`,
+			[]int64{4, 5, 6},
+		},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+
+		array, ok := evaluated.(*object.Array)
+		if !ok {
+			t.Errorf("Expected array, got %T (%+v)", evaluated, evaluated)
+			continue
+		}
+
+		if len(array.Elements) != len(tt.expected) {
+			t.Errorf("Wrong array length. Expected %d, got %d",
+				len(tt.expected), len(array.Elements))
+			continue
+		}
+
+		for i, expected := range tt.expected {
+			testIntegerObject(t, array.Elements[i], expected)
 		}
 	}
 }

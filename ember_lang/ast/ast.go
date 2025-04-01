@@ -542,3 +542,47 @@ func (ae *AssignmentExpression) String() string {
 
 	return out.String()
 }
+
+// ------------------------------------- PointerReferenceExpression -------------------------------------
+
+type PointerReferenceExpression struct {
+	Token token.Token // token.AMPERSAND token
+	Right Expression
+}
+
+func (pre *PointerReferenceExpression) expressionNode() {}
+
+func (pre *PointerReferenceExpression) TokenLiteral() string {
+	return pre.Token.Literal
+}
+
+func (pre *PointerReferenceExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("&")
+	out.WriteString(pre.Right.String())
+
+	return out.String()
+}
+
+// ------------------------------------- PointerDereferenceExpression -------------------------------------
+
+type PointerDereferenceExpression struct {
+	Token token.Token // token.ASTERISK token
+	Right Expression
+}
+
+func (pde *PointerDereferenceExpression) expressionNode() {}
+
+func (pde *PointerDereferenceExpression) TokenLiteral() string {
+	return pde.Token.Literal
+}
+
+func (pde *PointerDereferenceExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("*")
+	out.WriteString(pde.Right.String())
+
+	return out.String()
+}

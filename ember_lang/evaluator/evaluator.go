@@ -108,6 +108,10 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalForExpression(node, env)
 	case *ast.AssignmentExpression:
 		return evalAssignmentExpression(node, env)
+	case *ast.PointerReferenceExpression:
+		return evalPointerReferenceExpression(node, env)
+	case *ast.PointerDereferenceExpression:
+		return evalPointerDereferenceExpression(node, env)
 	}
 
 	return nil
@@ -331,6 +335,8 @@ func evalIndexExpression(left object.Object, index object.Object) object.Object 
 		return evalArrayIndexExpression(left, index)
 	case left.Type() == object.HASH_OBJ:
 		return evalHashIndexExpression(left, index)
+	case left.Type() == object.POINTER_OBJ:
+		return evalPointerIndexExpression(left, index)
 	default:
 		return newError("Index operator not supported: %s %s", left.Type(), index.Type())
 	}
@@ -365,6 +371,19 @@ func evalHashIndexExpression(hash object.Object, index object.Object) object.Obj
 	}
 
 	return pair.Value
+}
+
+func evalPointerIndexExpression(pointer object.Object, index object.Object) object.Object {
+	pointerObject := pointer.(*object.Pointer)
+
+	switch pointerObject.Value.(type) {
+	case *object.Array:
+		return evalArrayIndexExpression(pointerObject.Value, index)
+	case *object.Hash:
+		return evalHashIndexExpression(pointerObject.Value, index)
+	default:
+		return newError("Cannot index into type: %s", pointerObject.Value.Type())
+	}
 }
 
 func evalStringInfixExpression(operator string, left object.Object, right object.Object) object.Object {
@@ -491,6 +510,40 @@ func evalAssignmentExpression(node *ast.AssignmentExpression, env *object.Enviro
 		return right
 	}
 
+	// Assignment to a dereferenced pointer
+	if pointerDeref, ok := node.Left.(*ast.PointerDereferenceExpression); ok {
+		// Evaluate the pointer
+		pointerObj := Eval(pointerDeref.Right, env)
+		if isError(pointerObj) {
+			return pointerObj
+		}
+
+		// Check if it's a pointer
+		pointer, ok := pointerObj.(*object.Pointer)
+		if !ok {
+			return newError("(line %d) Cannot dereference non-pointer value: %s", node.Token.LineNumber, pointerObj.Type())
+		}
+
+		// Check if the variable is mutable
+		if !env.IsMutable(pointer.Name) {
+			return newError("(line %d) Cannot assign to immutable variable: %s", node.Token.LineNumber, pointer.Name)
+		}
+
+		// Evaluate the right-hand side of the assignment
+		right := Eval(node.Right, env)
+		if isError(right) {
+			return right
+		}
+
+		// Set the value of the variable
+		env.Set(pointer.Name, right, true)
+
+		// Update the pointer's value
+		pointer.Value = right
+
+		return right
+	}
+
 	// Assignment to an Index Expression
 	// eg. arr[0] = 1, map[key] = value
 	if indexExpression, ok := node.Left.(*ast.IndexExpression); ok {
@@ -505,10 +558,6 @@ func evalAssignmentExpression(node *ast.AssignmentExpression, env *object.Enviro
 			if !env.IsMutable(identifier.Value) {
 				return newError("(line %d) Cannot assign to immutable variable: %s", identifier.Token.LineNumber, identifier.Value)
 			}
-		} else {
-			// Handle nested index expressions or other complex left sides
-			// This allows for cases like: arr[i][j] = value
-			return newError("(line %d) Complex index expressions not yet supported for assignment", node.Token.LineNumber)
 		}
 
 		// Evaluate the index of the assignment
@@ -561,6 +610,43 @@ func evalAssignmentExpression(node *ast.AssignmentExpression, env *object.Enviro
 	}
 
 	return newError("(line %d) invalid assignment target", node.Token.LineNumber)
+}
+
+func evalPointerReferenceExpression(node *ast.PointerReferenceExpression, env *object.Environment) object.Object {
+	// We can only take the address of identifiers
+	if identifier, ok := node.Right.(*ast.Identifier); ok {
+		// Check if the variable exists
+		val, exists := env.Get(identifier.Value)
+		if !exists {
+			return newError("Cannot take address of undefined variable: %s", identifier.Value)
+		}
+
+		// Create a pointer to the variable
+		return &object.Pointer{
+			Name:  identifier.Value,
+			Value: val,
+		}
+	}
+
+	return newError("(line %d) Cannot take address of non-identifier expression", node.Token.LineNumber)
+}
+
+func evalPointerDereferenceExpression(node *ast.PointerDereferenceExpression, env *object.Environment) object.Object {
+	right := Eval(node.Right, env)
+	if isError(right) {
+		return right
+	}
+
+	if pointer, ok := right.(*object.Pointer); ok {
+		// Get the current value from the environment
+		val, exists := env.Get(pointer.Name)
+		if !exists {
+			return newError("Pointer references undefined variable: %s", pointer.Name)
+		}
+		return val
+	}
+
+	return newError("(line %d) Cannot dereference non-pointer value: %s", node.Token.LineNumber, right.Type())
 }
 
 func isTruthy(obj object.Object) bool {

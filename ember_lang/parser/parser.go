@@ -93,6 +93,8 @@ func New(lexer *lexer.Lexer) *Parser {
 	parser.registerPrefix(token.LBRACE, parser.parseHashLiteral)
 	parser.registerPrefix(token.WHILE, parser.parseWhileExpression)
 	parser.registerPrefix(token.FOR, parser.parseForExpression)
+	parser.registerPrefix(token.AMPERSAND, parser.parsePointerReferenceExpression)
+	parser.registerPrefix(token.ASTERISK, parser.parsePointerDereferenceExpression)
 
 	// Infix parse functions
 	parser.infixParseFns = make(map[token.TokenType]InfixParseFn)
@@ -620,11 +622,15 @@ func (parser *Parser) parseBlockStatement() *ast.BlockStatement {
 
 func (parser *Parser) parseAssignmentExpression(left ast.Expression) ast.Expression {
 	// Check if the left side is a valid assignment target
-	if _, ok := left.(*ast.Identifier); !ok {
-		// Also allow index expressions (array[index] or map[key])
-		if _, ok := left.(*ast.IndexExpression); !ok {
-			parser.errors = append(parser.errors, fmt.Sprintf("(line %d) invalid assignment target", parser.curToken.LineNumber))
-		}
+	isValidTarget := false
+
+	switch left.(type) {
+	case *ast.Identifier, *ast.IndexExpression, *ast.PointerDereferenceExpression:
+		isValidTarget = true
+	}
+
+	if !isValidTarget {
+		parser.errors = append(parser.errors, fmt.Sprintf("(line %d) invalid assignment target: %s", parser.curToken.LineNumber, left.TokenLiteral()))
 	}
 
 	expression := &ast.AssignmentExpression{
@@ -635,6 +641,38 @@ func (parser *Parser) parseAssignmentExpression(left ast.Expression) ast.Express
 	precedence := parser.curPrecedence()
 	parser.nextToken()
 	expression.Right = parser.parseExpression(precedence)
+
+	return expression
+}
+
+func (parser *Parser) parsePointerReferenceExpression() ast.Expression {
+	// Save the current token for the expression
+	currentToken := parser.curToken
+
+	// Move to the next token (after the &)
+	parser.nextToken()
+
+	// Create the expression with the correct token
+	expression := &ast.PointerReferenceExpression{
+		Token: currentToken,
+		Right: parser.parseExpression(PREFIX),
+	}
+
+	return expression
+}
+
+func (parser *Parser) parsePointerDereferenceExpression() ast.Expression {
+	// Save the current token for the expression
+	currentToken := parser.curToken
+
+	// Move to the next token (after the *)
+	parser.nextToken()
+
+	// Create the expression with the correct token
+	expression := &ast.PointerDereferenceExpression{
+		Token: currentToken,
+		Right: parser.parseExpression(PREFIX),
+	}
 
 	return expression
 }

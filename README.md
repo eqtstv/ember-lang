@@ -14,6 +14,7 @@ Ember is an interpreted programming language implemented in Go, designed to be s
 - Built-in functions for common operations
 - Variables with `let` keyword
 - Immutability by default with explicit `mut` keyword
+- Pointers with reference `&` and dereference `*` operators
 - Return statements
 - Operator precedence parsing
 - REPL with error reporting
@@ -103,6 +104,14 @@ let fib = fn(n) {
 
 let mut result = fib(10);  // Calculate 10th Fibonacci number
 print(result); // 55
+
+// Pointers
+let mut x = 5;
+let p = &x;
+print(*p); // 5
+*p = 10;
+print(x); // 10
+
 ```
 
 ## Mutability
@@ -120,6 +129,16 @@ let x = 5;
 let mut y = 5;
 y = 10;  // Works fine
 ```
+
+### Pointers
+
+Ember supports pointers to variables.
+
+- Create pointers with the `&` operator
+- Dereference pointers with the `*` operator
+- Pointer arithmetic is not supported for memory safety
+
+See the [pointers example](examples/pointers.em) for more details.
 
 ## Getting Started
 

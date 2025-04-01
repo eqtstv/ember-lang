@@ -61,10 +61,15 @@ func Start(in io.Reader, out io.Writer, debug string) {
 	if err != nil {
 		panic(err)
 	}
-	defer readline.Close()
+	defer func() {
+		err := readline.Close()
+		if err != nil {
+			fmt.Printf("Error closing readline: %s\n", err)
+		}
+	}()
 
-	fmt.Fprintf(out, "Ember Programming Language v0.0.1 (prototype)\n")
-	fmt.Fprintf(out, "Type \"help\" for more information.\n")
+	_, _ = fmt.Fprintf(out, "Ember Programming Language v0.0.1 (prototype)\n")
+	_, _ = fmt.Fprintf(out, "Type \"help\" for more information.\n")
 
 	for {
 		line, err := readline.Readline()
@@ -79,7 +84,7 @@ func Start(in io.Reader, out io.Writer, debug string) {
 
 		switch line {
 		case "help":
-			fmt.Fprint(out, HELP_TEXT)
+			_, _ = fmt.Fprint(out, HELP_TEXT)
 			continue
 		case "exit", "quit":
 			return

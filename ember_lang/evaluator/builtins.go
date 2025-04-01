@@ -3,6 +3,7 @@ package evaluator
 import (
 	"ember_lang/ember_lang/object"
 	"fmt"
+	"math/rand"
 )
 
 var builtins map[string]*object.Builtin
@@ -253,6 +254,30 @@ func init() {
 				default:
 					return newError("Invalid argument to type. Got: %s", args[0].Type())
 				}
+			},
+		},
+		"rand": {
+			Fn: func(args ...object.Object) object.Object {
+				if len(args) > 1 {
+					return newError("Invalid number of arguments. Got: %d, Expected: 0 or 1", len(args))
+				}
+
+				// If no arguments, return a random int between 0 and MaxInt32
+				if len(args) == 0 {
+					return &object.Integer{Value: int64(rand.Int31())}
+				}
+
+				// If one argument, it should be the max value (exclusive)
+				max, ok := args[0].(*object.Integer)
+				if !ok {
+					return newError("Invalid argument to rand. Got: %s, Expected: INTEGER", args[0].Type())
+				}
+
+				if max.Value <= 0 {
+					return newError("Argument to rand must be positive, got: %d", max.Value)
+				}
+
+				return &object.Integer{Value: int64(rand.Int63n(max.Value))}
 			},
 		},
 	}
