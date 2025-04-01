@@ -6,6 +6,7 @@ import (
 	"ember_lang/ember_lang/object"
 	"fmt"
 	"strings"
+	"time"
 )
 
 const (
@@ -26,6 +27,21 @@ const (
 	reset  = "\033[0m"
 )
 
+var startTime time.Time
+var enableTiming bool
+
+func StartTiming() {
+	enableTiming = true
+	startTime = time.Now()
+}
+
+func EndTiming() {
+	if enableTiming {
+		elapsed := time.Since(startTime)
+		fmt.Printf("[TIMING] Execution completed in: %v%s\n", elapsed, reset)
+	}
+}
+
 func LogSourceCode(code []byte) {
 	fmt.Printf("\n%s=== Source Code ===%s\n%s\n", blue, reset, string(code))
 }
@@ -43,7 +59,10 @@ func LogAST(node ast.Node) {
 }
 
 func LogResult(result object.Object) {
-	fmt.Printf("\n%s=== Result ===%s\n", blue, reset)
+	fmt.Printf("%s[RESULT] %v%s\n", green, result.Inspect(), reset)
+	if enableTiming {
+		EndTiming()
+	}
 }
 
 func printNode(node ast.Node, prefix string, isLast bool) {

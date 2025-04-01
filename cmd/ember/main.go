@@ -42,6 +42,11 @@ func executeFile(path string) {
 		logger.LogSourceCode(code)
 	}
 
+	// Start timing if debug=2
+	if debug == "2" {
+		logger.StartTiming()
+	}
+
 	// Lexical analysis
 	l := lexer.New(string(code))
 
@@ -67,11 +72,9 @@ func executeFile(path string) {
 	env := object.NewEnvironment()
 	result := evaluator.Eval(program, env)
 
-	if debug == "1" {
+	if debug == "1" || debug == "2" {
 		logger.LogResult(result)
-	}
-
-	if result != nil {
+	} else if result != nil {
 		fmt.Println(result.Inspect())
 	}
 }

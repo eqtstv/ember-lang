@@ -759,11 +759,11 @@ func TestParsingInvalidAssignmentTargets(t *testing.T) {
 		input           string
 		expectedMessage string
 	}{
-		{"5 = 10;", "(line 1) invalid assignment target"},
-		{"true = false;", "(line 1) invalid assignment target"},
-		{"\"hello\" = \"world\";", "(line 1) invalid assignment target"},
-		{"(x + y) = 10;", "(line 1) invalid assignment target"},
-		{"fn(x) { x } = 10;", "(line 1) invalid assignment target"},
+		{"5 = 10;", "(line 1) invalid assignment target: 5"},
+		{"true = false;", "(line 1) invalid assignment target: true"},
+		{"\"hello\" = \"world\";", "(line 1) invalid assignment target: hello"},
+		{"(x + y) = 10;", "(line 1) invalid assignment target: +"},
+		{"fn(x) { x } = 10;", "(line 1) invalid assignment target: fn"},
 	}
 
 	for _, tt := range tests {

@@ -335,6 +335,8 @@ func evalIndexExpression(left object.Object, index object.Object) object.Object 
 		return evalArrayIndexExpression(left, index)
 	case left.Type() == object.HASH_OBJ:
 		return evalHashIndexExpression(left, index)
+	case left.Type() == object.POINTER_OBJ:
+		return evalPointerIndexExpression(left, index)
 	default:
 		return newError("Index operator not supported: %s %s", left.Type(), index.Type())
 	}
@@ -369,6 +371,19 @@ func evalHashIndexExpression(hash object.Object, index object.Object) object.Obj
 	}
 
 	return pair.Value
+}
+
+func evalPointerIndexExpression(pointer object.Object, index object.Object) object.Object {
+	pointerObject := pointer.(*object.Pointer)
+
+	switch pointerObject.Value.(type) {
+	case *object.Array:
+		return evalArrayIndexExpression(pointerObject.Value, index)
+	case *object.Hash:
+		return evalHashIndexExpression(pointerObject.Value, index)
+	default:
+		return newError("Cannot index into type: %s", pointerObject.Value.Type())
+	}
 }
 
 func evalStringInfixExpression(operator string, left object.Object, right object.Object) object.Object {
@@ -545,8 +560,8 @@ func evalAssignmentExpression(node *ast.AssignmentExpression, env *object.Enviro
 			}
 		} else {
 			// Handle nested index expressions or other complex left sides
-			// This allows for cases like: arr[i][j] = value
-			return newError("(line %d) Complex index expressions not yet supported for assignment", node.Token.LineNumber)
+			// This allows for cases like: arr[i][j] = value, *arr_ptr[i] = value
+
 		}
 
 		// Evaluate the index of the assignment
@@ -617,7 +632,7 @@ func evalPointerReferenceExpression(node *ast.PointerReferenceExpression, env *o
 		}
 	}
 
-	return newError("Cannot take address of non-identifier expression")
+	return newError("(line %d) Cannot take address of non-identifier expression", node.Token.LineNumber)
 }
 
 func evalPointerDereferenceExpression(node *ast.PointerDereferenceExpression, env *object.Environment) object.Object {
@@ -635,7 +650,7 @@ func evalPointerDereferenceExpression(node *ast.PointerDereferenceExpression, en
 		return val
 	}
 
-	return newError("Cannot dereference non-pointer value: %s", right.Type())
+	return newError("(line %d) Cannot dereference non-pointer value: %s", node.Token.LineNumber, right.Type())
 }
 
 func isTruthy(obj object.Object) bool {
