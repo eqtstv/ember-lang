@@ -828,3 +828,67 @@ func TestParsingMutableLetStatements(t *testing.T) {
 		}
 	}
 }
+
+func TestPointerReferenceExpression(t *testing.T) {
+	input := "&x;"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain 1 statement. got=%d",
+			len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	exp, ok := stmt.Expression.(*ast.PointerReferenceExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not ast.PointerReferenceExpression. got=%T",
+			stmt.Expression)
+	}
+
+	if exp.TokenLiteral() != "&" {
+		t.Fatalf("exp.TokenLiteral not '&'. got=%q", exp.TokenLiteral())
+	}
+
+	testIdentifier(t, exp.Right, "x")
+}
+
+func TestPointerDereferenceExpression(t *testing.T) {
+	input := "*p;"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain 1 statement. got=%d",
+			len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	exp, ok := stmt.Expression.(*ast.PointerDereferenceExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not ast.PointerDereferenceExpression. got=%T",
+			stmt.Expression)
+	}
+
+	if exp.TokenLiteral() != "*" {
+		t.Fatalf("exp.TokenLiteral not '*'. got=%q", exp.TokenLiteral())
+	}
+
+	testIdentifier(t, exp.Right, "p")
+}

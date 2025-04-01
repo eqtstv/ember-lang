@@ -132,6 +132,10 @@ for (let i = 0; i < 5; i++) {
 }
 ```
 
+### 2.7 Pointers
+
+Ember supports pointers for referencing variables. Pointers are created using the `&` operator and dereferenced using the `*` operator.
+
 ## 3. Type System
 
 Currently supported types:

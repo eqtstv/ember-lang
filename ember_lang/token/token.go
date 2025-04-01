@@ -73,12 +73,13 @@ const (
 	STRING     = "STRING"
 
 	// Operators
-	ASSIGN   = "ASSIGN"
-	PLUS     = "PLUS"
-	MINUS    = "MINUS"
-	BANG     = "BANG"
-	ASTERISK = "ASTERISK"
-	SLASH    = "SLASH"
+	ASSIGN    = "ASSIGN"
+	PLUS      = "PLUS"
+	MINUS     = "MINUS"
+	BANG      = "BANG"
+	ASTERISK  = "ASTERISK"
+	SLASH     = "SLASH"
+	AMPERSAND = "AMPERSAND" // New token for &
 
 	// Suffix operators
 	INCREMENT = "INCREMENT"

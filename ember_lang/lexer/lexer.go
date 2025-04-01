@@ -92,6 +92,8 @@ func (l *Lexer) NextToken() token.Token {
 		} else {
 			tok = newToken(token.BANG, l.ch, l.lineNumber)
 		}
+	case '&':
+		tok = newToken(token.AMPERSAND, l.ch, l.lineNumber)
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF

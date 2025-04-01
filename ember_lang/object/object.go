@@ -25,6 +25,7 @@ const (
 	BUILTIN_OBJ      ObjectType = "BUILTIN"
 	ARRAY_OBJ        ObjectType = "ARRAY"
 	HASH_OBJ         ObjectType = "HASH"
+	POINTER_OBJ      ObjectType = "POINTER"
 )
 
 // ----------------------------------------------------------------------------
@@ -269,4 +270,21 @@ func (h *Hash) Inspect() string {
 
 type Hashable interface {
 	HashKey() HashKey
+}
+
+// ----------------------------------------------------------------------------
+// Pointer Object
+// ----------------------------------------------------------------------------
+
+type Pointer struct {
+	Name  string
+	Value Object
+}
+
+func (p *Pointer) Type() ObjectType {
+	return POINTER_OBJ
+}
+
+func (p *Pointer) Inspect() string {
+	return fmt.Sprintf("&%s (%s)", p.Name, p.Value.Inspect())
 }
