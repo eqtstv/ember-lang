@@ -104,6 +104,14 @@ let fib = fn(n) {
 
 let mut result = fib(10);  // Calculate 10th Fibonacci number
 print(result); // 55
+
+// Pointers
+let mut x = 5;
+let p = &x;
+print(*p); // 5
+*p = 10;
+print(x); // 10
+
 ```
 
 ## Mutability
